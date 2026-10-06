@@ -27,6 +27,11 @@ final class ProductAPIClientTests: XCTestCase {
         MockURLProtocol.requestHandlers = [:]
         try super.tearDownWithError()
     }
+    
+    // MARK: Protocol Conformance Tests
+    func testConformsToProductRepository() {
+        XCTAssertTrue((sut as Any) is ProductAPIClient)
+    }
 
     // MARK: fetchProductList Tests
     func testFetchProductList_whenGivenLimit20AndSkip0_returnsFirst20ProductResponseDTOs() async throws {

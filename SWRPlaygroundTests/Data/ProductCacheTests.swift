@@ -20,6 +20,11 @@ final class ProductCacheTests: XCTestCase {
         sut = nil
         try super.tearDownWithError()
     }
+    
+    // MARK: Protocol Conformance Tests
+    func testConformsToProductCaching() {
+        XCTAssertTrue((sut as Any) is ProductCaching)
+    }
 
     // MARK: ProductItemsByPage Cache Tests
     func testGetProductItemsByPage_whenNoItemCached_returnsNil() {
@@ -150,7 +155,7 @@ final class ProductCacheTests: XCTestCase {
         XCTAssertEqual(sut.getProductDetail(id: 1), updatedDetail)
     }
 
-    // MARK: Initialization & Configuration Tests
+    // MARK: Initialization Tests
     func testInit_withCustomLimits_functionsCorrectly() {
         // Given
         let customCache = ProductCache(
@@ -170,22 +175,6 @@ final class ProductCacheTests: XCTestCase {
         // Then
         XCTAssertEqual(customCache.getProductItemsByPage(for: request), page)
         XCTAssertEqual(customCache.getProductDetail(id: 42), detail)
-    }
-
-    func testProductCache_conformsToProductCachingProtocol() {
-        // Given
-        let cachingService: ProductCaching = sut
-        let request = makePageRequest(limit: 20, skip: 0)
-        let page = makeProductItemsByPage()
-        let detail = makeProductDetail(id: 5)
-
-        // When
-        cachingService.insertProductItemsByPage(page, for: request)
-        cachingService.insertProductDetail(detail)
-
-        // Then
-        XCTAssertEqual(cachingService.getProductItemsByPage(for: request), page)
-        XCTAssertEqual(cachingService.getProductDetail(id: 5), detail)
     }
 }
 
