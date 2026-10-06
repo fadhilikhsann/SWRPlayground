@@ -29,7 +29,7 @@ final class ProductAPIClientTests: XCTestCase {
     }
     
     // MARK: Protocol Conformance Tests
-    func testConformsToProductRepository() {
+    func testConformsToProductAPIClient() {
         XCTAssertTrue((sut as Any) is ProductAPIClient)
     }
 
