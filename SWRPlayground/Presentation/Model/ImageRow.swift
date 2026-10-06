@@ -1,6 +1,6 @@
 //
 //  ImageRow.swift
-//  Product Catalog v3
+//  SWRPlayground
 //
 //  Created by Fadhil Ikhsanta's Personal on 29/09/26.
 //

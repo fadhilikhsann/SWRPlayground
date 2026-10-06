@@ -2,7 +2,7 @@ import UIKit
 
 //
 //  AppCoordinator.swift
-//  Product Catalog v3
+//  SWRPlayground
 //
 //  Created by Fadhil Ikhsanta's Personal on 25/09/26.
 //
