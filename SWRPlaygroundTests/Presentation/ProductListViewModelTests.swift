@@ -62,10 +62,12 @@ final class ProductListViewModelTests: XCTestCase {
         let networkItem2 = makeProductItem(id: 2, title: "Revalidated Product 2")
         let networkPage = makeProductItemsByPage(products: [networkItem1, networkItem2], total: 10)
 
-        repository.observeProductItemsByPageResult = AsyncThrowingStream { continuation in
-            continuation.yield(cachedPage)
-            continuation.yield(networkPage)
-            continuation.finish()
+        repository.observeProductItemsByPageStreamClosure = {
+            AsyncThrowingStream { continuation in
+                continuation.yield(cachedPage)
+                continuation.yield(networkPage)
+                continuation.finish()
+            }
         }
 
         sut.statePublisher
@@ -97,9 +99,11 @@ final class ProductListViewModelTests: XCTestCase {
     func testStart_whenStateIsNotStart_doesNotTriggerRefreshTask() async {
         let expectation = expectation(description: "First refresh finished.")
         let page = makeProductItemsByPage(products: [makeProductItem(id: 1)], total: 10)
-        repository.observeProductItemsByPageResult = AsyncThrowingStream { continuation in
-            continuation.yield(page)
-            continuation.finish()
+        repository.observeProductItemsByPageStreamClosure = {
+            AsyncThrowingStream { continuation in
+                continuation.yield(page)
+                continuation.finish()
+            }
         }
 
         sut.statePublisher
@@ -157,10 +161,12 @@ final class ProductListViewModelTests: XCTestCase {
         let networkItem2 = makeProductItem(id: 2, title: "New Product 2")
         let networkPage = makeProductItemsByPage(products: [networkItem1, networkItem2], total: 10)
 
-        repository.observeProductItemsByPageResult = AsyncThrowingStream { continuation in
-            continuation.yield(cachedPage)
-            continuation.yield(networkPage)
-            continuation.finish()
+        repository.observeProductItemsByPageStreamClosure = {
+            AsyncThrowingStream { continuation in
+                continuation.yield(cachedPage)
+                continuation.yield(networkPage)
+                continuation.finish()
+            }
         }
 
         sut.statePublisher
@@ -196,10 +202,12 @@ final class ProductListViewModelTests: XCTestCase {
         let cachedPage = makeProductItemsByPage(products: [product], total: 10)
         let networkPage = makeProductItemsByPage(products: [product], total: 10)
 
-        repository.observeProductItemsByPageResult = AsyncThrowingStream { continuation in
-            continuation.yield(cachedPage)
-            continuation.yield(networkPage)
-            continuation.finish()
+        repository.observeProductItemsByPageStreamClosure = {
+            AsyncThrowingStream { continuation in
+                continuation.yield(cachedPage)
+                continuation.yield(networkPage)
+                continuation.finish()
+            }
         }
 
         sut.statePublisher
@@ -229,8 +237,10 @@ final class ProductListViewModelTests: XCTestCase {
         var recordedStates: [TableViewState<ProductListTask, ProductListConfig>] = []
         let errorDescription = "Failed to fetch products."
         let error = MockLocalizedError(errorDescription: errorDescription)
-        repository.observeProductItemsByPageResult = AsyncThrowingStream { continuation in
-            continuation.finish(throwing: error)
+        repository.observeProductItemsByPageStreamClosure = {
+            AsyncThrowingStream { continuation in
+                continuation.finish(throwing: error)
+            }
         }
 
         sut.statePublisher
@@ -262,9 +272,11 @@ final class ProductListViewModelTests: XCTestCase {
         let cachedPage = makeProductItemsByPage(products: [cachedItem], total: 10)
         let networkError = MockLocalizedError(errorDescription: "Network failure after cache.")
 
-        repository.observeProductItemsByPageResult = AsyncThrowingStream { continuation in
-            continuation.yield(cachedPage)
-            continuation.finish(throwing: networkError)
+        repository.observeProductItemsByPageStreamClosure = {
+            AsyncThrowingStream { continuation in
+                continuation.yield(cachedPage)
+                continuation.finish(throwing: networkError)
+            }
         }
 
         sut.statePublisher
@@ -293,8 +305,10 @@ final class ProductListViewModelTests: XCTestCase {
         let expectation = expectation(description: "Refresh finished after cancellation error.")
         var recordedStates: [TableViewState<ProductListTask, ProductListConfig>] = []
 
-        repository.observeProductItemsByPageResult = AsyncThrowingStream { continuation in
-            continuation.finish(throwing: CancellationError())
+        repository.observeProductItemsByPageStreamClosure = {
+            AsyncThrowingStream { continuation in
+                continuation.finish(throwing: CancellationError())
+            }
         }
 
         sut.statePublisher
@@ -320,7 +334,7 @@ final class ProductListViewModelTests: XCTestCase {
     // MARK: - Load More Tests
     func testRequest_loadMore_whenStateIsRunningTask_doesNotExecuteLoadMore() async {
         let (stream, continuation) = AsyncThrowingStream<ProductItemsByPage, Error>.makeStream()
-        repository.observeProductItemsByPageResult = stream
+        repository.observeProductItemsByPageStreamClosure = { stream }
 
         let expectation = expectation(description: "State enters runningTask.")
         sut.statePublisher
@@ -350,7 +364,7 @@ final class ProductListViewModelTests: XCTestCase {
 
         let page = makeProductItemsByPage(products: [makeProductItem(id: 1)], total: 10)
         let (stream, continuation) = AsyncThrowingStream<ProductItemsByPage, Error>.makeStream()
-        repository.observeProductItemsByPageResult = stream
+        repository.observeProductItemsByPageStreamClosure = { stream }
 
         sut.statePublisher
             .sink { state in
@@ -376,9 +390,11 @@ final class ProductListViewModelTests: XCTestCase {
         let expectation = expectation(description: "Refresh with empty list finished.")
 
         let emptyPage = makeProductItemsByPage(products: [], total: 0)
-        repository.observeProductItemsByPageResult = AsyncThrowingStream { continuation in
-            continuation.yield(emptyPage)
-            continuation.finish()
+        repository.observeProductItemsByPageStreamClosure = {
+            AsyncThrowingStream { continuation in
+                continuation.yield(emptyPage)
+                continuation.finish()
+            }
         }
 
         sut.statePublisher
@@ -407,9 +423,11 @@ final class ProductListViewModelTests: XCTestCase {
         let item2 = makeProductItem(id: 2)
         let page = makeProductItemsByPage(products: [item1, item2], total: 2)
 
-        repository.observeProductItemsByPageResult = AsyncThrowingStream { continuation in
-            continuation.yield(page)
-            continuation.finish()
+        repository.observeProductItemsByPageStreamClosure = {
+            AsyncThrowingStream { continuation in
+                continuation.yield(page)
+                continuation.finish()
+            }
         }
 
         sut.statePublisher
@@ -440,9 +458,11 @@ final class ProductListViewModelTests: XCTestCase {
         let item1 = makeProductItem(id: 1, title: "Product 1")
         let refreshCachedPage = makeProductItemsByPage(products: [item1], total: 10)
 
-        repository.observeProductItemsByPageResult = AsyncThrowingStream { continuation in
-            continuation.yield(refreshCachedPage)
-            continuation.finish()
+        repository.observeProductItemsByPageStreamClosure = {
+            AsyncThrowingStream { continuation in
+                continuation.yield(refreshCachedPage)
+                continuation.finish()
+            }
         }
 
         sut.statePublisher
@@ -467,10 +487,12 @@ final class ProductListViewModelTests: XCTestCase {
         let loadMoreNetworkItem = makeProductItem(id: 2, title: "Product 2 Network")
         let loadMoreNetworkPage = makeProductItemsByPage(products: [loadMoreNetworkItem], total: 10)
 
-        repository.observeProductItemsByPageResult = AsyncThrowingStream { continuation in
-            continuation.yield(loadMoreCachedPage)
-            continuation.yield(loadMoreNetworkPage)
-            continuation.finish()
+        repository.observeProductItemsByPageStreamClosure = {
+            AsyncThrowingStream { continuation in
+                continuation.yield(loadMoreCachedPage)
+                continuation.yield(loadMoreNetworkPage)
+                continuation.finish()
+            }
         }
 
         sut.request(.loadMore)

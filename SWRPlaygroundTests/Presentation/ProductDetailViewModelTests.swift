@@ -64,10 +64,12 @@ final class ProductDetailViewModelTests: XCTestCase {
         let cachedDetail = makeProductDetail(id: productId, title: "Cached Product", price: 10.0)
         let networkDetail = makeProductDetail(id: productId, title: "Updated Product", price: 15.0)
 
-        repository.observeProductDetailResult = AsyncThrowingStream { continuation in
-            continuation.yield(cachedDetail)
-            continuation.yield(networkDetail)
-            continuation.finish()
+        repository.observeProductDetailStreamClosure = {
+            AsyncThrowingStream { continuation in
+                continuation.yield(cachedDetail)
+                continuation.yield(networkDetail)
+                continuation.finish()
+            }
         }
 
         sut.statePublisher
@@ -104,10 +106,12 @@ final class ProductDetailViewModelTests: XCTestCase {
 
         let detail = makeProductDetail(id: productId, title: "Same Product")
 
-        repository.observeProductDetailResult = AsyncThrowingStream { continuation in
-            continuation.yield(detail)
-            continuation.yield(detail)
-            continuation.finish()
+        repository.observeProductDetailStreamClosure = {
+            AsyncThrowingStream { continuation in
+                continuation.yield(detail)
+                continuation.yield(detail)
+                continuation.finish()
+            }
         }
 
         sut.statePublisher
@@ -138,8 +142,10 @@ final class ProductDetailViewModelTests: XCTestCase {
         var recordedStates: [TableViewState<ProductDetailTask, [ProductDetailRow]>] = []
 
         let error = MockLocalizedError(errorDescription: "Failed to fetch product detail")
-        repository.observeProductDetailResult = AsyncThrowingStream { continuation in
-            continuation.finish(throwing: error)
+        repository.observeProductDetailStreamClosure = {
+            AsyncThrowingStream { continuation in
+                continuation.finish(throwing: error)
+            }
         }
 
         sut.statePublisher
@@ -176,9 +182,11 @@ final class ProductDetailViewModelTests: XCTestCase {
         let cachedDetail = makeProductDetail(id: productId, title: "Cached Product")
         let error = MockLocalizedError(errorDescription: "Network error after cache.")
 
-        repository.observeProductDetailResult = AsyncThrowingStream { continuation in
-            continuation.yield(cachedDetail)
-            continuation.finish(throwing: error)
+        repository.observeProductDetailStreamClosure = {
+            AsyncThrowingStream { continuation in
+                continuation.yield(cachedDetail)
+                continuation.finish(throwing: error)
+            }
         }
 
         sut.statePublisher
@@ -212,10 +220,12 @@ final class ProductDetailViewModelTests: XCTestCase {
         let expectation = expectation(description: "Refresh finished after cancellation error.")
         var recordedStates: [TableViewState<ProductDetailTask, [ProductDetailRow]>] = []
 
-        repository.observeProductDetailResult = AsyncThrowingStream { continuation in
-            continuation.finish(throwing: CancellationError())
+        repository.observeProductDetailStreamClosure = {
+            AsyncThrowingStream { continuation in
+                continuation.finish(throwing: CancellationError())
+            }
         }
-
+        
         sut.statePublisher
             .sink { state in
                 recordedStates.append(state)

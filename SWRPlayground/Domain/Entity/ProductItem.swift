@@ -14,5 +14,3 @@ struct ProductItem: Identifiable, Equatable {
     let price: Double
     let thumbnailURL: URL?
 }
-
-

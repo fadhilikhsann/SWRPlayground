@@ -26,76 +26,80 @@ final class DefaultProductRepository: ProductRepository {
     func observeProductItemsByPage(
         for request: PageRequest
     ) -> AsyncThrowingStream<ProductItemsByPage, Error> {
-		AsyncThrowingStream { continuation in
-            let task = Task { [weak self] in
-                guard let self else {
-                    continuation.finish()
-                    return
-                }
-                
-                let cachedPage = cache.getProductItemsByPage(for: request)
-                if let cachedPage {
-                    continuation.yield(cachedPage)
-                }
-
-                do {
-					let networkPage = try await apiClient.fetchProductList(request: request)
-                    try Task.checkCancellation()
-					
-					let domainPage = networkPage.toDomain()
-					
-					cache.insertProductItemsByPage(domainPage, for: request)
-                    if cachedPage != domainPage {
-                        continuation.yield(domainPage)
-                    }
-                    continuation.finish()
-                } catch is CancellationError {
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
-                }
+        let (stream, continuation) = AsyncThrowingStream<ProductItemsByPage, Error>.makeStream()
+        
+        let task = Task { [weak self] in
+            guard let self else {
+                continuation.finish(throwing: CancellationError())
+                return
             }
-
-            continuation.onTermination = { @Sendable _ in
-                task.cancel()
+            
+            let cachedPage = cache.getProductItemsByPage(for: request)
+            if let cachedPage {
+                continuation.yield(cachedPage)
+            }
+            
+            do {
+                let networkPage = try await apiClient.fetchProductList(request: request)
+                try Task.checkCancellation()
+                
+                let domainPage = networkPage.toDomain()
+                
+                cache.insertProductItemsByPage(domainPage, for: request)
+                if cachedPage != domainPage {
+                    continuation.yield(domainPage)
+                }
+                continuation.finish()
+            } catch is CancellationError {
+                continuation.finish()
+            } catch {
+                continuation.finish(throwing: error)
             }
         }
+        
+        continuation.onTermination = { @Sendable _ in
+            task.cancel()
+        }
+        
+        return stream
     }
 	
-	func observeProductDetail(id: Int) -> AsyncThrowingStream<ProductDetail, Error> {
-		AsyncThrowingStream { continuation in
-			let task = Task { [weak self] in
-                guard let self else {
-                    continuation.finish()
-                    return
-                }
+    func observeProductDetail(id: Int) -> AsyncThrowingStream<ProductDetail, Error> {
+        let (stream, continuation) = AsyncThrowingStream<ProductDetail, Error>.makeStream()
+        
+        let task = Task { [weak self] in
+            guard let self else {
+                continuation.finish(throwing: CancellationError())
+                return
+            }
+            
+            let cachedProduct = cache.getProductDetail(id: id)
+            if let cachedProduct {
+                continuation.yield(cachedProduct)
+            }
+            
+            do {
+                let product = try await apiClient.fetchProductDetail(id: id)
+                try Task.checkCancellation()
                 
-                let cachedProduct = cache.getProductDetail(id: id)
-                if let cachedProduct {
-                    continuation.yield(cachedProduct)
+                let domainProduct = product.toDomain()
+                
+                cache.insertProductDetail(domainProduct)
+                if cachedProduct != domainProduct {
+                    continuation.yield(domainProduct)
                 }
-				
-				do {
-					let product = try await apiClient.fetchProductDetail(id: id)
-					try Task.checkCancellation()
-					
-					let domainProduct = product.toDomain()
-					
-					cache.insertProductDetail(domainProduct)
-                    if cachedProduct != domainProduct {
-                        continuation.yield(domainProduct)
-                    }
-					continuation.finish()
-				} catch is CancellationError {
-					continuation.finish()
-				} catch {
-					continuation.finish(throwing: error)
-				}
-			}
-			
-			continuation.onTermination = { @Sendable _ in
-				task.cancel()
-			}
-		}
-	}
+                continuation.finish()
+            } catch is CancellationError {
+                continuation.finish()
+            } catch {
+                continuation.finish(throwing: error)
+            }
+        }
+        
+        continuation.onTermination = { @Sendable _ in
+            task.cancel()
+        }
+        
+        return stream
+    }
 }
