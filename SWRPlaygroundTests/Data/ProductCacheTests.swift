@@ -21,12 +21,12 @@ final class ProductCacheTests: XCTestCase {
         try super.tearDownWithError()
     }
     
-    // MARK: Protocol Conformance Tests
+    // MARK: - Protocol Conformance Tests
     func testConformsToProductCaching() {
         XCTAssertTrue((sut as Any) is ProductCaching)
     }
 
-    // MARK: ProductItemsByPage Cache Tests
+    // MARK: - ProductItemsByPage Cache Tests
     func testGetProductItemsByPage_whenNoItemCached_returnsNil() {
         // Given
         let request = makePageRequest(limit: 20, skip: 0)
@@ -101,7 +101,7 @@ final class ProductCacheTests: XCTestCase {
         XCTAssertEqual(sut.getProductItemsByPage(for: request), updatedPage)
     }
 
-    // MARK: ProductDetail Cache Tests
+    // MARK: - ProductDetail Cache Tests
     func testGetProductDetail_whenNoProductCached_returnsNil() {
         // Given
         let productId = 1
@@ -155,7 +155,7 @@ final class ProductCacheTests: XCTestCase {
         XCTAssertEqual(sut.getProductDetail(id: 1), updatedDetail)
     }
 
-    // MARK: Initialization Tests
+    // MARK: - Initialization Tests
     func testInit_withCustomLimits_functionsCorrectly() {
         // Given
         let customCache = ProductCache(
@@ -178,7 +178,7 @@ final class ProductCacheTests: XCTestCase {
     }
 }
 
-// MARK: Helper Factory Methods
+// MARK: - Helper Factory Methods
 extension ProductCacheTests {
     private func makePageRequest(
         limit: Int = 20,

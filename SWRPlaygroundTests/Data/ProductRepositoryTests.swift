@@ -27,12 +27,12 @@ final class ProductRepositoryTests: XCTestCase {
         try super.tearDownWithError()
     }
 
-    // MARK: Protocol Conformance Tests
+    // MARK: - Protocol Conformance Tests
     func testConformsToProductRepository() {
         XCTAssertTrue((sut as Any) is ProductRepository)
     }
 
-    // MARK: observeProductItemsByPage Tests
+    // MARK: - observeProductItemsByPage Tests
     func testObserveProductItemsByPage_whenCacheIsEmptyAndNetworkSucceeds_emitsNetworkPageAndInsertsIntoCache() async throws {
         // Given
         let request = makePageRequest(limit: 20, skip: 0)
@@ -170,7 +170,7 @@ final class ProductRepositoryTests: XCTestCase {
         }
     }
 
-    // MARK: observeProductDetail Tests
+    // MARK: - observeProductDetail Tests
     func testObserveProductDetail_whenCacheIsEmptyAndNetworkSucceeds_emitsNetworkDetailAndInsertsIntoCache() async throws {
         // Given
         let productId = 1
@@ -297,7 +297,7 @@ final class ProductRepositoryTests: XCTestCase {
     }
 }
 
-// MARK: Helper Methods
+// MARK: - Helper Methods
 extension ProductRepositoryTests {
     private func makePageRequest(
         limit: Int = 20,

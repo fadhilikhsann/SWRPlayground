@@ -32,10 +32,6 @@ final class ProductListViewModel: ProductListViewModelProtocol {
 		$state.eraseToAnyPublisher()
 	}
 	
-	//	private var cancellables: Set<AnyCancellable> = []
-	//
-	//	private let loadTaskThrottlePublisher: PassthroughSubject<ListViewTask, Never> = .init()
-	
 	private var loadTask: Task<Void, Never>?
 	
 	private var products: [ProductItem] = []
@@ -47,22 +43,11 @@ final class ProductListViewModel: ProductListViewModelProtocol {
 	init(pageSize: Int = 20, repository: ProductRepository) {
 		self.pageSize = pageSize
 		self.repository = repository
-		//		bindingPublisher()
 	}
 	
 	deinit {
 		loadTask?.cancel()
 	}
-	
-	//	private func bindingPublisher() {
-	//		loadTaskThrottlePublisher
-	//			.throttle(for: .milliseconds(300), scheduler: RunLoop.main, latest: true)
-	//			.sink { [weak self] task in
-	//				guard let self else { return }
-	//				executeTaskIfNeeded(task)
-	//			}
-	//			.store(in: &cancellables)
-	//	}
 	
 	func start() {
 		guard state == .start else { return }
@@ -70,7 +55,6 @@ final class ProductListViewModel: ProductListViewModelProtocol {
 	}
 	
 	func request(_ task: ProductListTask) {
-		//		loadTaskThrottlePublisher.send(task)
 		executeTaskIfNeeded(task)
 	}
 	

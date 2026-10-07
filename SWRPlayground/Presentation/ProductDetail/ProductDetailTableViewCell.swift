@@ -11,7 +11,7 @@ import SnapKit
 class ProductDetailTableViewCell: UITableViewCell {
 	static let reuseIdentifier = "ProductDetailTableViewCell"
 	
-	// MARK: Properties
+	// MARK: - Properties
 	private let titlePlaceholder = "\t\t\t\t\t\t\t\t"
 	private let categoryPlaceholder = "\t\t\t\t\t\t"
 	private let pricePlaceholder = "\t\t\t\t"
@@ -53,7 +53,7 @@ class ProductDetailTableViewCell: UITableViewCell {
 		return label
 	}()
 	
-	// MARK: Overrides
+	// MARK: - Overrides
 	override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
 		super.init(style: style, reuseIdentifier: reuseIdentifier)
 		configureView()
@@ -69,7 +69,7 @@ class ProductDetailTableViewCell: UITableViewCell {
 	}
 }
 
-// MARK: Support methods
+// MARK: - Support methods
 extension ProductDetailTableViewCell {
 	private func configureView() {
 		selectionStyle = .none

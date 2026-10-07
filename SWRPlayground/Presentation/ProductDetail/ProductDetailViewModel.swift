@@ -57,6 +57,10 @@ final class ProductDetailViewModel: ProductDetailViewModelProtocol {
 		self.id = id
 		self.repository = repository
 	}
+    
+    deinit {
+        loadTask?.cancel()
+    }
 	
 	func refresh() {
 		loadTask?.cancel()

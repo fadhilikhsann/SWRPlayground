@@ -28,12 +28,12 @@ final class ProductAPIClientTests: XCTestCase {
         try super.tearDownWithError()
     }
     
-    // MARK: Protocol Conformance Tests
+    // MARK: - Protocol Conformance Tests
     func testConformsToProductAPIClient() {
         XCTAssertTrue((sut as Any) is ProductAPIClient)
     }
 
-    // MARK: fetchProductList Tests
+    // MARK: - fetchProductList Tests
     func testFetchProductList_whenGivenLimit20AndSkip0_returnsFirst20ProductResponseDTOs() async throws {
         // Given
         let request = PageRequest(limit: 20, skip: 0)
@@ -172,7 +172,7 @@ final class ProductAPIClientTests: XCTestCase {
         }
     }
 
-    // MARK: fetchProductDetail Tests
+    // MARK: - fetchProductDetail Tests
     func testFetchProductDetail_whenGivenId1_returnsProductDetailDTOWithId1() async throws {
         // Given
         let productId = 1
@@ -306,7 +306,7 @@ final class ProductAPIClientTests: XCTestCase {
     }
 }
 
-// MARK: Helper Methods
+// MARK: - Helper Methods
 extension ProductAPIClientTests {
     private func loadJSONData(filename: String) throws -> Data {
         let bundle = Bundle(for: ProductAPIClientTests.self)
