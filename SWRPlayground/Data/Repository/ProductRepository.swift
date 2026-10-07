@@ -28,10 +28,14 @@ final class DefaultProductRepository: ProductRepository {
     ) -> AsyncThrowingStream<ProductItemsByPage, Error> {
 		AsyncThrowingStream { continuation in
             let task = Task { [weak self] in
-				guard let self else { throw CancellationError() }
-				
-				if let cachedPage = cache.getProductItemsByPage(for: request) {
-					continuation.yield(cachedPage)
+                guard let self else {
+                    continuation.finish()
+                    return
+                }
+                
+                let cachedPage = cache.getProductItemsByPage(for: request)
+                if let cachedPage {
+                    continuation.yield(cachedPage)
                 }
 
                 do {
@@ -41,7 +45,9 @@ final class DefaultProductRepository: ProductRepository {
 					let domainPage = networkPage.toDomain()
 					
 					cache.insertProductItemsByPage(domainPage, for: request)
-					continuation.yield(domainPage)
+                    if cachedPage != domainPage {
+                        continuation.yield(domainPage)
+                    }
                     continuation.finish()
                 } catch is CancellationError {
                     continuation.finish()
@@ -59,11 +65,15 @@ final class DefaultProductRepository: ProductRepository {
 	func observeProductDetail(id: Int) -> AsyncThrowingStream<ProductDetail, Error> {
 		AsyncThrowingStream { continuation in
 			let task = Task { [weak self] in
-				guard let self else { throw CancellationError() }
-				
-				if let cachedPage = cache.getProductDetail(id: id) {
-					continuation.yield(cachedPage)
-				}
+                guard let self else {
+                    continuation.finish()
+                    return
+                }
+                
+                let cachedProduct = cache.getProductDetail(id: id)
+                if let cachedProduct {
+                    continuation.yield(cachedProduct)
+                }
 				
 				do {
 					let product = try await apiClient.fetchProductDetail(id: id)
@@ -72,7 +82,9 @@ final class DefaultProductRepository: ProductRepository {
 					let domainProduct = product.toDomain()
 					
 					cache.insertProductDetail(domainProduct)
-					continuation.yield(domainProduct)
+                    if cachedProduct != domainProduct {
+                        continuation.yield(domainProduct)
+                    }
 					continuation.finish()
 				} catch is CancellationError {
 					continuation.finish()

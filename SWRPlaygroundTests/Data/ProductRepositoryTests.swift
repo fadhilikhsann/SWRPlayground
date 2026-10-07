@@ -87,6 +87,33 @@ final class ProductRepositoryTests: XCTestCase {
         XCTAssertEqual(cache.insertProductItemsByPageCallCount, 2)
     }
 
+    func testObserveProductItemsByPage_whenCachedDataEqualsNetworkData_emitsOnlyCachedPageAndUpdatesCache() async throws {
+        // Given
+        let request = makePageRequest(limit: 20, skip: 0)
+        let productDTO = makeProductItemDTO(id: 1, title: "Same Product")
+        let networkResponseDTO = makeProductResponseDTO(
+            products: [productDTO],
+            skip: 0,
+            limit: 20
+        )
+        let expectedPage = networkResponseDTO.toDomain()
+        cache.insertProductItemsByPage(expectedPage, for: request)
+        apiClient.fetchProductListResult = .success(networkResponseDTO)
+
+        // When
+        var emittedPages: [ProductItemsByPage] = []
+        for try await page in sut.observeProductItemsByPage(for: request) {
+            emittedPages.append(page)
+        }
+
+        // Then
+        XCTAssertEqual(emittedPages.count, 1)
+        XCTAssertEqual(emittedPages.first, expectedPage)
+        XCTAssertEqual(cache.getProductItemsByPageCallCount, 1)
+        XCTAssertEqual(apiClient.fetchProductListCallCount, 1)
+        XCTAssertEqual(cache.insertProductItemsByPageCallCount, 2)
+    }
+
     func testObserveProductItemsByPage_whenCacheIsEmptyAndNetworkFails_throwsErrorAndDoesNotInsertIntoCache() async throws {
         // Given
         let request = makePageRequest(limit: 20, skip: 0)
@@ -212,6 +239,28 @@ final class ProductRepositoryTests: XCTestCase {
         XCTAssertEqual(emittedDetails.count, 2)
         XCTAssertEqual(emittedDetails.first, cachedDetail)
         XCTAssertEqual(emittedDetails.last, expectedNetworkDetail)
+        XCTAssertEqual(cache.getProductDetailCallCount, 1)
+        XCTAssertEqual(apiClient.fetchProductDetailCallCount, 1)
+        XCTAssertEqual(cache.insertProductDetailCallCount, 2)
+    }
+
+    func testObserveProductDetail_whenCachedDataEqualsNetworkData_emitsOnlyCachedDetailAndUpdatesCache() async throws {
+        // Given
+        let productId = 1
+        let detailDTO = makeProductDetailDTO(id: productId, title: "Same Detail Product")
+        let expectedDetail = detailDTO.toDomain()
+        cache.insertProductDetail(expectedDetail)
+        apiClient.fetchProductDetailResult = .success(detailDTO)
+
+        // When
+        var emittedDetails: [ProductDetail] = []
+        for try await detail in sut.observeProductDetail(id: productId) {
+            emittedDetails.append(detail)
+        }
+
+        // Then
+        XCTAssertEqual(emittedDetails.count, 1)
+        XCTAssertEqual(emittedDetails.first, expectedDetail)
         XCTAssertEqual(cache.getProductDetailCallCount, 1)
         XCTAssertEqual(apiClient.fetchProductDetailCallCount, 1)
         XCTAssertEqual(cache.insertProductDetailCallCount, 2)
