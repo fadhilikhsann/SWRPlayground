@@ -113,15 +113,15 @@ final class ProductAPIClientTests: XCTestCase {
         // When / Then
         do {
             _ = try await sut.fetchProductList(request: request)
-            XCTFail("Expected fetchProductList to throw APIClientError.httpStatus(500)")
+            XCTFail("Expected fetchProductList to throw APIClientError.httpStatus(500).")
         } catch let error as APIClientError {
             if case let .httpStatus(statusCode) = error {
                 XCTAssertEqual(statusCode, 500)
             } else {
-                XCTFail("Expected .httpStatus(500), got \(error)")
+                XCTFail("Expected .httpStatus(500), got \(error).")
             }
         } catch {
-            XCTFail("Expected APIClientError, got \(error)")
+            XCTFail("Expected APIClientError, got \(error).")
         }
     }
 
@@ -144,11 +144,11 @@ final class ProductAPIClientTests: XCTestCase {
         // When / Then
         do {
             _ = try await sut.fetchProductList(request: request)
-            XCTFail("Expected decoding error to be thrown")
+            XCTFail("Expected decoding error to be thrown.")
         } catch is DecodingError {
             // Expected
         } catch {
-            XCTFail("Expected DecodingError, got \(error)")
+            XCTFail("Expected DecodingError, got \(error).")
         }
     }
 
@@ -164,11 +164,11 @@ final class ProductAPIClientTests: XCTestCase {
         // When / Then
         do {
             _ = try await sut.fetchProductList(request: request)
-            XCTFail("Expected network error to be thrown")
+            XCTFail("Expected network error to be thrown.")
         } catch let error as URLError {
             XCTAssertEqual(error.code, .notConnectedToInternet)
         } catch {
-            XCTFail("Expected URLError, got \(error)")
+            XCTFail("Expected URLError, got \(error).")
         }
     }
 
@@ -246,15 +246,15 @@ final class ProductAPIClientTests: XCTestCase {
         // When / Then
         do {
             _ = try await sut.fetchProductDetail(id: productId)
-            XCTFail("Expected fetchProductDetail to throw APIClientError.httpStatus(404)")
+            XCTFail("Expected fetchProductDetail to throw APIClientError.httpStatus(404).")
         } catch let error as APIClientError {
             if case let .httpStatus(statusCode) = error {
                 XCTAssertEqual(statusCode, 404)
             } else {
-                XCTFail("Expected .httpStatus(404), got \(error)")
+                XCTFail("Expected .httpStatus(404), got \(error).")
             }
         } catch {
-            XCTFail("Expected APIClientError, got \(error)")
+            XCTFail("Expected APIClientError, got \(error).")
         }
     }
 
@@ -277,11 +277,11 @@ final class ProductAPIClientTests: XCTestCase {
         // When / Then
         do {
             _ = try await sut.fetchProductDetail(id: productId)
-            XCTFail("Expected decoding error to be thrown")
+            XCTFail("Expected decoding error to be thrown.")
         } catch is DecodingError {
             // Expected
         } catch {
-            XCTFail("Expected DecodingError, got \(error)")
+            XCTFail("Expected DecodingError, got \(error).")
         }
     }
 
@@ -297,11 +297,11 @@ final class ProductAPIClientTests: XCTestCase {
         // When / Then
         do {
             _ = try await sut.fetchProductDetail(id: productId)
-            XCTFail("Expected network error to be thrown")
+            XCTFail("Expected network error to be thrown.")
         } catch let error as URLError {
             XCTAssertEqual(error.code, .timedOut)
         } catch {
-            XCTFail("Expected URLError, got \(error)")
+            XCTFail("Expected URLError, got \(error).")
         }
     }
 }
@@ -316,7 +316,7 @@ extension ProductAPIClientTests {
         if let url = bundle.url(forResource: filename, withExtension: nil) {
             return try Data(contentsOf: url)
         }
-        XCTFail("Could not locate JSON file: \(filename)")
+        XCTFail("Could not locate JSON file: \(filename).")
         throw APIClientError.invalidURL
     }
 }

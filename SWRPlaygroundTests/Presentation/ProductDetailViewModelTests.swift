@@ -58,7 +58,7 @@ final class ProductDetailViewModelTests: XCTestCase {
 
     // MARK: - Refresh Tests
     func testRefresh_whenRepositoryEmitsCachedAndDifferentNetworkData_updatesPropertiesAndEmitsResultStates() async {
-        let expectation = expectation(description: "Refresh completes with SWR cached and network emissions")
+        let expectation = expectation(description: "Refresh finished with SWR cached and network emissions.")
         var recordedStates: [TableViewState<ProductDetailTask, [ProductDetailRow]>] = []
 
         let cachedDetail = makeProductDetail(id: productId, title: "Cached Product", price: 10.0)
@@ -99,7 +99,7 @@ final class ProductDetailViewModelTests: XCTestCase {
     }
 
     func testRefresh_whenRepositoryEmitsCachedAndEqualNetworkData_emitsResultStateOnlyOnce() async {
-        let expectation = expectation(description: "Refresh completes")
+        let expectation = expectation(description: "Refresh finished.")
         var recordedStates: [TableViewState<ProductDetailTask, [ProductDetailRow]>] = []
 
         let detail = makeProductDetail(id: productId, title: "Same Product")
@@ -134,7 +134,7 @@ final class ProductDetailViewModelTests: XCTestCase {
     }
 
     func testRefresh_whenRepositoryThrowsErrorWithoutEmissions_emitsEndTaskWithoutUpdatingProperties() async {
-        let expectation = expectation(description: "Refresh completes with error")
+        let expectation = expectation(description: "Refresh finished with error.")
         var recordedStates: [TableViewState<ProductDetailTask, [ProductDetailRow]>] = []
 
         let error = MockLocalizedError(errorDescription: "Failed to fetch product detail")
@@ -164,17 +164,17 @@ final class ProductDetailViewModelTests: XCTestCase {
         XCTAssertEqual(recordedStates, [
             .start,
             .runningTask(.refresh),
-            .errorMessage("Failed to fetch product detail"),
+            .errorMessage("Failed to fetch product detail."),
             .endTask
         ])
     }
 
     func testRefresh_whenRepositoryThrowsErrorAfterEmittingCachedData_retainsCachedData() async {
-        let expectation = expectation(description: "Refresh completes after cached hit and network error")
+        let expectation = expectation(description: "Refresh finished after cached hit and network error.")
         var recordedStates: [TableViewState<ProductDetailTask, [ProductDetailRow]>] = []
 
         let cachedDetail = makeProductDetail(id: productId, title: "Cached Product")
-        let error = MockLocalizedError(errorDescription: "Network error after cache")
+        let error = MockLocalizedError(errorDescription: "Network error after cache.")
 
         repository.observeProductDetailResult = AsyncThrowingStream { continuation in
             continuation.yield(cachedDetail)
@@ -209,7 +209,7 @@ final class ProductDetailViewModelTests: XCTestCase {
     }
 
     func testRefresh_whenTaskIsCancelled_endsTaskWithoutUpdatingProperties() async {
-        let expectation = expectation(description: "Refresh finishes after cancellation error")
+        let expectation = expectation(description: "Refresh finished after cancellation error.")
         var recordedStates: [TableViewState<ProductDetailTask, [ProductDetailRow]>] = []
 
         repository.observeProductDetailResult = AsyncThrowingStream { continuation in

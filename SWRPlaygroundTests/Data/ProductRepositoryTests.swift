@@ -117,7 +117,7 @@ final class ProductRepositoryTests: XCTestCase {
     func testObserveProductItemsByPage_whenCacheIsEmptyAndNetworkFails_throwsErrorAndDoesNotInsertIntoCache() async throws {
         // Given
         let request = makePageRequest(limit: 20, skip: 0)
-        let expectedError = MockLocalizedError(errorDescription: "Network failure")
+        let expectedError = MockLocalizedError(errorDescription: "Network failure.")
         apiClient.fetchProductListResult = .failure(expectedError)
 
         // When
@@ -149,7 +149,7 @@ final class ProductRepositoryTests: XCTestCase {
         )
         cache.insertProductItemsByPage(cachedPage, for: request)
 
-        let expectedError = MockLocalizedError(errorDescription: "Network failure after cache hit")
+        let expectedError = MockLocalizedError(errorDescription: "Network failure after cache hit.")
         apiClient.fetchProductListResult = .failure(expectedError)
 
         // When
@@ -269,7 +269,7 @@ final class ProductRepositoryTests: XCTestCase {
     func testObserveProductDetail_whenCacheIsEmptyAndNetworkFails_throwsErrorAndDoesNotInsertIntoCache() async throws {
         // Given
         let productId = 1
-        let expectedError = MockLocalizedError(errorDescription: "Detail network failure")
+        let expectedError = MockLocalizedError(errorDescription: "Detail network failure.")
         apiClient.fetchProductDetailResult = .failure(expectedError)
 
         // When
@@ -297,7 +297,7 @@ final class ProductRepositoryTests: XCTestCase {
         let cachedDetail = makeProductDetail(id: productId, title: "Cached Detail")
         cache.insertProductDetail(cachedDetail)
 
-        let expectedError = MockLocalizedError(errorDescription: "Detail network failure after cache hit")
+        let expectedError = MockLocalizedError(errorDescription: "Detail network failure after cache hit.")
         apiClient.fetchProductDetailResult = .failure(expectedError)
 
         // When

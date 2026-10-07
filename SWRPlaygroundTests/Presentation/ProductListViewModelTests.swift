@@ -52,7 +52,7 @@ final class ProductListViewModelTests: XCTestCase {
 
     // MARK: - start Tests
     func testStart_whenStateIsStart_triggersRefreshTaskAndHandlesSWRStream() async {
-        let expectation = expectation(description: "State transitions to endTask")
+        let expectation = expectation(description: "State transitions to endTask.")
         var recordedStates: [TableViewState<ProductListTask, ProductListConfig>] = []
 
         let cachedItem = makeProductItem(id: 1, title: "Cached Product")
@@ -95,7 +95,7 @@ final class ProductListViewModelTests: XCTestCase {
     }
 
     func testStart_whenStateIsNotStart_doesNotTriggerRefreshTask() async {
-        let expectation = expectation(description: "First refresh finishes")
+        let expectation = expectation(description: "First refresh finished.")
         let page = makeProductItemsByPage(products: [makeProductItem(id: 1)], total: 10)
         repository.observeProductItemsByPageResult = AsyncThrowingStream { continuation in
             continuation.yield(page)
@@ -126,7 +126,7 @@ final class ProductListViewModelTests: XCTestCase {
     func testRequest_refresh_whenPageSizeIsZeroOrNegative_emitsEndTaskWithoutObservingRepository() async {
         sut = ProductListViewModel(pageSize: 0, repository: repository)
 
-        let expectation = expectation(description: "State transitions to endTask")
+        let expectation = expectation(description: "State transitions to endTask.")
         var recordedStates: [TableViewState<ProductListTask, ProductListConfig>] = []
 
         sut.statePublisher
@@ -147,7 +147,7 @@ final class ProductListViewModelTests: XCTestCase {
     }
 
     func testRequest_refresh_whenRepositoryEmitsCachedAndDifferentNetworkData_resetsWithCachedThenMergesNetworkData() async {
-        let expectation = expectation(description: "Refresh completes with SWR cached and network emissions")
+        let expectation = expectation(description: "Refresh finished with SWR cached and network emissions.")
         var recordedStates: [TableViewState<ProductListTask, ProductListConfig>] = []
 
         let cachedItem1 = makeProductItem(id: 1, title: "Cached Product 1")
@@ -189,7 +189,7 @@ final class ProductListViewModelTests: XCTestCase {
     }
 
     func testRequest_refresh_whenRepositoryEmitsCachedAndEqualNetworkData_resetsWithCachedAndDoesNotEmitDuplicateResultState() async {
-        let expectation = expectation(description: "Refresh completes")
+        let expectation = expectation(description: "Refresh finished.")
         var recordedStates: [TableViewState<ProductListTask, ProductListConfig>] = []
 
         let product = makeProductItem(id: 1, title: "Same Product")
@@ -225,10 +225,10 @@ final class ProductListViewModelTests: XCTestCase {
     }
 
     func testRequest_refresh_whenRepositoryThrowsErrorAndProductsIsEmpty_emitsErrorMessage() async {
-        let expectation = expectation(description: "Refresh completes with error")
+        let expectation = expectation(description: "Refresh finished with error.")
         var recordedStates: [TableViewState<ProductListTask, ProductListConfig>] = []
-
-        let error = MockLocalizedError(errorDescription: "Failed to fetch products")
+        let errorDescription = "Failed to fetch products."
+        let error = MockLocalizedError(errorDescription: errorDescription)
         repository.observeProductItemsByPageResult = AsyncThrowingStream { continuation in
             continuation.finish(throwing: error)
         }
@@ -249,18 +249,18 @@ final class ProductListViewModelTests: XCTestCase {
         XCTAssertEqual(recordedStates, [
             .start,
             .runningTask(.refresh),
-            .errorMessage("Failed to fetch products"),
+            .errorMessage(errorDescription),
             .endTask
         ])
     }
 
     func testRequest_refresh_whenRepositoryThrowsErrorAfterEmittingCachedData_retainsCachedDataWithoutEmittingErrorMessage() async {
-        let expectation = expectation(description: "Refresh finishes after SWR cached hit and network error")
+        let expectation = expectation(description: "Refresh finished after SWR cached hit and network error.")
         var recordedStates: [TableViewState<ProductListTask, ProductListConfig>] = []
 
         let cachedItem = makeProductItem(id: 1, title: "Cached Product")
         let cachedPage = makeProductItemsByPage(products: [cachedItem], total: 10)
-        let networkError = MockLocalizedError(errorDescription: "Network failure after cache")
+        let networkError = MockLocalizedError(errorDescription: "Network failure after cache.")
 
         repository.observeProductItemsByPageResult = AsyncThrowingStream { continuation in
             continuation.yield(cachedPage)
@@ -290,7 +290,7 @@ final class ProductListViewModelTests: XCTestCase {
     }
 
     func testRequest_refresh_whenTaskIsCancelled_endsTaskWithoutErrorMessage() async {
-        let expectation = expectation(description: "Refresh finishes after cancellation error")
+        let expectation = expectation(description: "Refresh finished after cancellation error.")
         var recordedStates: [TableViewState<ProductListTask, ProductListConfig>] = []
 
         repository.observeProductItemsByPageResult = AsyncThrowingStream { continuation in
@@ -322,7 +322,7 @@ final class ProductListViewModelTests: XCTestCase {
         let (stream, continuation) = AsyncThrowingStream<ProductItemsByPage, Error>.makeStream()
         repository.observeProductItemsByPageResult = stream
 
-        let expectation = expectation(description: "State enters runningTask")
+        let expectation = expectation(description: "State enters runningTask.")
         sut.statePublisher
             .sink { state in
                 if state == .runningTask(.refresh) {
@@ -346,7 +346,7 @@ final class ProductListViewModelTests: XCTestCase {
     }
 
     func testRequest_loadMore_whenStateIsResultTaskWithRefresh_doesNotExecuteLoadMore() async {
-        let expectation = expectation(description: "First emission occurs")
+        let expectation = expectation(description: "First emission occurs.")
 
         let page = makeProductItemsByPage(products: [makeProductItem(id: 1)], total: 10)
         let (stream, continuation) = AsyncThrowingStream<ProductItemsByPage, Error>.makeStream()
@@ -373,7 +373,7 @@ final class ProductListViewModelTests: XCTestCase {
     }
 
     func testRequest_loadMore_whenProductsIsEmpty_doesNotExecuteLoadMore() async {
-        let expectation = expectation(description: "Refresh with empty list completes")
+        let expectation = expectation(description: "Refresh with empty list finished.")
 
         let emptyPage = makeProductItemsByPage(products: [], total: 0)
         repository.observeProductItemsByPageResult = AsyncThrowingStream { continuation in
@@ -401,7 +401,7 @@ final class ProductListViewModelTests: XCTestCase {
     }
 
     func testRequest_loadMore_whenProductsCountEqualsTotalProductsCount_doesNotExecuteLoadMore() async {
-        let expectation = expectation(description: "Refresh completes")
+        let expectation = expectation(description: "Refresh finished.")
 
         let item1 = makeProductItem(id: 1)
         let item2 = makeProductItem(id: 2)
@@ -432,8 +432,8 @@ final class ProductListViewModelTests: XCTestCase {
     }
 
     func testRequest_loadMore_whenRepositoryEmitsCachedAndNetworkData_mergesCachedThenMergesNetworkData() async {
-        let refreshExpectation = expectation(description: "Refresh completes")
-        let loadMoreExpectation = expectation(description: "Load more completes")
+        let refreshExpectation = expectation(description: "Refresh finished.")
+        let loadMoreExpectation = expectation(description: "Load more finished.")
 
         var recordedStates: [TableViewState<ProductListTask, ProductListConfig>] = []
 
