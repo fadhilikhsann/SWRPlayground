@@ -5,7 +5,6 @@
 //  Created by Fadhil Ikhsanta's Personal on 06/10/26.
 //
 
-import Foundation
 @testable import SWRPlayground
 
 final class MockProductAPIClient: ProductAPIClient {
@@ -19,10 +18,10 @@ final class MockProductAPIClient: ProductAPIClient {
         fetchProductListCallCount += 1
         
         switch fetchProductListResult {
-        case .success(let success):
-            return success
-        case .failure(let failure):
-            throw failure
+        case let .success(value):
+            return value
+        case let .failure(error):
+            throw error
         case nil:
             throw MockLocalizedError(errorDescription: "No result.")
         }
@@ -32,10 +31,10 @@ final class MockProductAPIClient: ProductAPIClient {
         fetchProductDetailCallCount += 1
         
         switch fetchProductDetailResult {
-        case .success(let success):
-            return success
-        case .failure(let failure):
-            throw failure
+        case let .success(value):
+            return value
+        case let .failure(error):
+            throw error
         case nil:
             throw MockLocalizedError(errorDescription: "No result.")
         }
