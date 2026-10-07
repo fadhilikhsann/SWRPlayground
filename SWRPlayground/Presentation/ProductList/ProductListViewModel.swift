@@ -102,6 +102,7 @@ extension ProductListViewModel {
 	
 	private func executeLoadRefresh() {
 		loadTask?.cancel()
+        loadTask = nil
 		
 		let task = ProductListTask.refresh
 		state = .runningTask(task)
@@ -134,15 +135,15 @@ extension ProductListViewModel {
 					state = .errorMessage(error.localizedDescription)
 				}
 			}
-			
-			state = .endTask
-			
-			loadTask = nil
+            
+            state = .endTask
+            loadTask = nil
 		}
 	}
 	
 	private func executeLoadMore() {
 		loadTask?.cancel()
+        loadTask = nil
 		
 		let task = ProductListTask.loadMore
 		state = .runningTask(task)
@@ -167,10 +168,9 @@ extension ProductListViewModel {
 					state = .errorMessage(error.localizedDescription)
 				}
 			}
-			
-			state = .endTask
-			
-			loadTask = nil
+            
+            state = .endTask
+            loadTask = nil
 		}
 	}
 }

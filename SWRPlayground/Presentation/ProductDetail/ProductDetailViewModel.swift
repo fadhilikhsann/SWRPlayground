@@ -60,10 +60,12 @@ final class ProductDetailViewModel: ProductDetailViewModelProtocol {
     
     deinit {
         loadTask?.cancel()
+        loadTask = nil
     }
 	
 	func refresh() {
 		loadTask?.cancel()
+        loadTask = nil
 		
 		state = .runningTask(.refresh)
 		
@@ -82,12 +84,13 @@ final class ProductDetailViewModel: ProductDetailViewModelProtocol {
 			} catch is CancellationError {
 				/// End task
 			} catch {
-				/// End task
+                if productDetail == nil {
+                    state = .errorMessage(error.localizedDescription)
+                }
 			}
-			
-			state = .endTask
-			
-			loadTask = nil
+            
+            state = .endTask
+            loadTask = nil
 		}
 	}
 }

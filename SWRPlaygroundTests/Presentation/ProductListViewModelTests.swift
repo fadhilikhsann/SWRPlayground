@@ -12,8 +12,8 @@ import XCTest
 @MainActor
 final class ProductListViewModelTests: XCTestCase {
     private var coordinator: MockAppCoordinator!
-    private var sut: ProductListViewModel!
     private var repository: MockProductRepository!
+    private var sut: ProductListViewModel!
     private var cancellables: Set<AnyCancellable>!
 
     override func setUpWithError() throws {
@@ -34,7 +34,7 @@ final class ProductListViewModelTests: XCTestCase {
     }
 
     // MARK: - Protocol Conformance Tests
-    func testConformsToProductRepository() {
+    func testConformsToProductListViewModelProtocol() {
         XCTAssertTrue((sut as Any) is ProductListViewModelProtocol)
     }
 
