@@ -33,12 +33,12 @@ final class ProductListViewModelTests: XCTestCase {
         try super.tearDownWithError()
     }
 
-    // MARK: - Protocol Conformance Tests
+    // MARK: - Protocol conformance tests
     func testConformsToProductListViewModelProtocol() {
         XCTAssertTrue((sut as Any) is ProductListViewModelProtocol)
     }
 
-    // MARK: - Initial State Tests
+    // MARK: - Initial state tests
     func testInit_initialStateAndPropertiesAreCorrect() {
         var recordedStates: [TableViewState<ProductListTask, ProductListConfig>] = []
         sut.statePublisher
@@ -50,7 +50,7 @@ final class ProductListViewModelTests: XCTestCase {
         XCTAssertNil(sut.getProductItem(id: 1))
     }
 
-    // MARK: - start Tests
+    // MARK: - start tests
     func testStart_whenStateIsStart_triggersRefreshTaskAndHandlesSWRStream() async {
         let expectation = expectation(description: "State transitions to endTask.")
         var recordedStates: [TableViewState<ProductListTask, ProductListConfig>] = []
@@ -126,7 +126,7 @@ final class ProductListViewModelTests: XCTestCase {
         XCTAssertEqual(repository.observeProductItemsByPageCallCount, 1)
     }
 
-    // MARK: - Refresh Tests
+    // MARK: - Refresh tests
     func testRequest_refresh_whenPageSizeIsZeroOrNegative_emitsEndTaskWithoutObservingRepository() async {
         sut = ProductListViewModel(pageSize: 0, repository: repository)
 
@@ -331,7 +331,7 @@ final class ProductListViewModelTests: XCTestCase {
         ])
     }
 
-    // MARK: - Load More Tests
+    // MARK: - Load more tests
     func testRequest_loadMore_whenStateIsRunningTask_doesNotExecuteLoadMore() async {
         let (stream, continuation) = AsyncThrowingStream<ProductItemsByPage, Error>.makeStream()
         repository.observeProductItemsByPageStreamClosure = { stream }
@@ -514,7 +514,7 @@ final class ProductListViewModelTests: XCTestCase {
         XCTAssertEqual(sut.getTotalProductsCount(), 10)
     }
 
-    // MARK: - Selection & Coordinator Tests
+    // MARK: - Selection & coordinator tests
     func testDidSelectProduct_invokesCoordinatorShowProductDetailScreen() {
         sut.didSelectProduct(id: 42)
 
@@ -523,7 +523,7 @@ final class ProductListViewModelTests: XCTestCase {
     }
 }
 
-// MARK: - Helper Methods
+// MARK: - Support methods
 extension ProductListViewModelTests {
     private func makeProductItem(
         id: Int = 1,

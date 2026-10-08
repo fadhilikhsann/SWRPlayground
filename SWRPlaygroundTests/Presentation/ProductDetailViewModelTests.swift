@@ -36,12 +36,12 @@ final class ProductDetailViewModelTests: XCTestCase {
         try super.tearDownWithError()
     }
 
-    // MARK: - Protocol Conformance Tests
+    // MARK: - Protocol conformance tests
     func testConformsToProductDetailViewModelProtocol() {
         XCTAssertTrue((sut as Any) is ProductDetailViewModelProtocol)
     }
 
-    // MARK: - Initial State Tests
+    // MARK: - Initial state tests
     func testInit_initialStateAndPropertiesAreCorrect() {
         var recordedStates: [TableViewState<ProductDetailTask, [ProductDetailRow]>] = []
         sut.statePublisher
@@ -49,14 +49,14 @@ final class ProductDetailViewModelTests: XCTestCase {
             .store(in: &cancellables)
 
         XCTAssertEqual(recordedStates, [.start])
-        XCTAssertTrue(sut.imageURLs.isEmpty)
-        XCTAssertNil(sut.title)
-        XCTAssertNil(sut.category)
-        XCTAssertNil(sut.price)
-        XCTAssertNil(sut.description)
+        XCTAssertTrue(sut.getImageURLs().isEmpty)
+        XCTAssertNil(sut.getTitle())
+        XCTAssertNil(sut.getCategory())
+        XCTAssertNil(sut.getPrice())
+        XCTAssertNil(sut.getDescription())
     }
 
-    // MARK: - Refresh Tests
+    // MARK: - Refresh tests
     func testRefresh_whenRepositoryEmitsCachedAndDifferentNetworkData_updatesPropertiesAndEmitsResultStates() async {
         let expectation = expectation(description: "Refresh finished with SWR cached and network emissions.")
         var recordedStates: [TableViewState<ProductDetailTask, [ProductDetailRow]>] = []
@@ -86,11 +86,11 @@ final class ProductDetailViewModelTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 2.0)
 
         XCTAssertEqual(repository.observeProductDetailCallCount, 1)
-        XCTAssertEqual(sut.imageURLs, networkDetail.imageURLs)
-        XCTAssertEqual(sut.title, networkDetail.title)
-        XCTAssertEqual(sut.category, networkDetail.category)
-        XCTAssertEqual(sut.price, networkDetail.price)
-        XCTAssertEqual(sut.description, networkDetail.description)
+        XCTAssertEqual(sut.getImageURLs(), networkDetail.imageURLs)
+        XCTAssertEqual(sut.getTitle(), networkDetail.title)
+        XCTAssertEqual(sut.getCategory(), networkDetail.category)
+        XCTAssertEqual(sut.getPrice(), networkDetail.price)
+        XCTAssertEqual(sut.getDescription(), networkDetail.description)
         XCTAssertEqual(recordedStates, [
             .start,
             .runningTask(.refresh),
@@ -128,7 +128,7 @@ final class ProductDetailViewModelTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 2.0)
 
         XCTAssertEqual(repository.observeProductDetailCallCount, 1)
-        XCTAssertEqual(sut.title, detail.title)
+        XCTAssertEqual(sut.getTitle(), detail.title)
         XCTAssertEqual(recordedStates, [
             .start,
             .runningTask(.refresh),
@@ -162,11 +162,11 @@ final class ProductDetailViewModelTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 2.0)
 
         XCTAssertEqual(repository.observeProductDetailCallCount, 1)
-        XCTAssertTrue(sut.imageURLs.isEmpty)
-        XCTAssertNil(sut.title)
-        XCTAssertNil(sut.category)
-        XCTAssertNil(sut.price)
-        XCTAssertNil(sut.description)
+        XCTAssertTrue(sut.getImageURLs().isEmpty)
+        XCTAssertNil(sut.getTitle())
+        XCTAssertNil(sut.getCategory())
+        XCTAssertNil(sut.getPrice())
+        XCTAssertNil(sut.getDescription())
         XCTAssertEqual(recordedStates, [
             .start,
             .runningTask(.refresh),
@@ -203,11 +203,11 @@ final class ProductDetailViewModelTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 2.0)
 
         XCTAssertEqual(repository.observeProductDetailCallCount, 1)
-        XCTAssertEqual(sut.title, cachedDetail.title)
-        XCTAssertEqual(sut.category, cachedDetail.category)
-        XCTAssertEqual(sut.price, cachedDetail.price)
-        XCTAssertEqual(sut.description, cachedDetail.description)
-        XCTAssertEqual(sut.imageURLs, cachedDetail.imageURLs)
+        XCTAssertEqual(sut.getTitle(), cachedDetail.title)
+        XCTAssertEqual(sut.getCategory(), cachedDetail.category)
+        XCTAssertEqual(sut.getPrice(), cachedDetail.price)
+        XCTAssertEqual(sut.getDescription(), cachedDetail.description)
+        XCTAssertEqual(sut.getImageURLs(), cachedDetail.imageURLs)
         XCTAssertEqual(recordedStates, [
             .start,
             .runningTask(.refresh),
@@ -248,7 +248,7 @@ final class ProductDetailViewModelTests: XCTestCase {
     }
 }
 
-// MARK: - Helper Methods
+// MARK: - Support methods
 extension ProductDetailViewModelTests {
     private func makeProductDetail(
         id: Int = 1,
