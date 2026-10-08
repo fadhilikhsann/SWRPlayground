@@ -10,7 +10,6 @@ import UIKit
 // MARK: - Protocol
 @MainActor
 protocol AppCoordinatorDelegate: AnyObject {
-	func start()
 	func showProductDetailScreen(productId: Int)
 }
 
