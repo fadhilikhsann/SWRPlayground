@@ -140,8 +140,8 @@ final class ProductDetailViewModelTests: XCTestCase {
     func testRefresh_whenRepositoryThrowsErrorWithoutEmissions_emitsEndTaskWithoutUpdatingProperties() async {
         let expectation = expectation(description: "Refresh finished with error.")
         var recordedStates: [TableViewState<ProductDetailTask, [ProductDetailRow]>] = []
-
-        let error = MockLocalizedError(errorDescription: "Failed to fetch product detail")
+        let errorDescription = "Failed to fetch product detail."
+        let error = MockLocalizedError(errorDescription: errorDescription)
         repository.observeProductDetailStreamClosure = {
             AsyncThrowingStream { continuation in
                 continuation.finish(throwing: error)
@@ -170,7 +170,7 @@ final class ProductDetailViewModelTests: XCTestCase {
         XCTAssertEqual(recordedStates, [
             .start,
             .runningTask(.refresh),
-            .errorMessage("Failed to fetch product detail."),
+            .errorMessage(errorDescription),
             .endTask
         ])
     }
