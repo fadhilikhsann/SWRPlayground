@@ -8,61 +8,90 @@
 import Foundation
 import Combine
 
+// MARK: - Protocol
 @MainActor
 protocol ProductDetailViewModelProtocol: AnyObject {
 	var statePublisher: AnyPublisher<TableViewState<ProductDetailTask, [ProductDetailRow]>, Never> { get }
 	
-	var imageURLs: [URL] { get }
-	var title: String? { get }
-	var category: String? { get }
-	var price: Double? { get }
-	var description: String? { get }
+    func getImageURLs() -> [URL]
+    func getTitle() -> String?
+    func getCategory() -> String?
+    func getPrice() -> Double?
+    func getDescription() -> String?
 	
 	func refresh()
 }
 
 @MainActor
-final class ProductDetailViewModel: ProductDetailViewModelProtocol {
-	typealias STATE = TableViewState<ProductDetailTask, [ProductDetailRow]>
-	
-	weak var coordinator: AppCoordinatorDelegate?
-	
-	private let id: Int
-	
-	private var productDetail: ProductDetail? {
-		willSet {
-			imageURLs = newValue?.imageURLs ?? []
-			title = newValue?.title
-			category = newValue?.category
-			price = newValue?.price
-			description = newValue?.description
-		}
-	}
-	
-	private(set) var imageURLs: [URL] = []
-	private(set) var title: String?
-	private(set) var category: String?
-	private(set) var price: Double?
-	private(set) var description: String?
-	
-	@Published private var state: STATE = .start
-	var statePublisher: AnyPublisher<STATE, Never> {
-		$state.eraseToAnyPublisher()
-	}
-	
-	private var loadTask: Task<Void, Never>?
-	
-	private let repository: ProductRepository
-	init(id: Int, repository: ProductRepository) {
-		self.id = id
-		self.repository = repository
-	}
+final class ProductDetailViewModel {
+    // MARK: - Typealiases
+    typealias STATE = TableViewState<ProductDetailTask, [ProductDetailRow]>
+    
+    // MARK: - Properties
+    weak var coordinator: AppCoordinatorDelegate?
+    
+    private let id: Int
+    
+    private var productDetail: ProductDetail? {
+        willSet {
+            imageURLs = newValue?.imageURLs ?? []
+            title = newValue?.title
+            category = newValue?.category
+            price = newValue?.price
+            description = newValue?.description
+        }
+    }
+    
+    private var imageURLs: [URL] = []
+    private var title: String?
+    private var category: String?
+    private var price: Double?
+    private var description: String?
+    
+    @Published private var state: STATE = .start
+    
+    private var loadTask: Task<Void, Never>?
+    
+    private let repository: ProductRepository
+    
+    // MARK: - Init
+    init(id: Int, repository: ProductRepository) {
+        self.id = id
+        self.repository = repository
+    }
     
     deinit {
         loadTask?.cancel()
         loadTask = nil
     }
-	
+}
+
+// MARK: - Conforms protocol
+extension ProductDetailViewModel: ProductDetailViewModelProtocol {
+    var statePublisher: AnyPublisher<STATE, Never> {
+        $state.eraseToAnyPublisher()
+    }
+    
+    func getImageURLs() -> [URL] {
+        imageURLs
+    }
+    
+    func getTitle() -> String? {
+        title
+    }
+    
+    func getCategory() -> String? {
+        category
+    }
+    
+    func getPrice() -> Double? {
+        price
+    }
+    
+    func getDescription() -> String? {
+        description
+    }
+    
 	func refresh() {
 		loadTask?.cancel()
         loadTask = nil

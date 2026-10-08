@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 
 class ProductDetailTableViewCell: UITableViewCell {
+    // MARK: - Identifier
 	static let reuseIdentifier = "ProductDetailTableViewCell"
 	
 	// MARK: - Properties
@@ -17,6 +18,7 @@ class ProductDetailTableViewCell: UITableViewCell {
 	private let pricePlaceholder = "\t\t\t\t"
 	private let descriptionPlaceholder = "\t\t\t\t\t\t\t\t\t\t"
 	
+    // MARK: - Views
 	private lazy var titleLabel: UILabel = {
 		let label = UILabel()
 		label.text = titlePlaceholder

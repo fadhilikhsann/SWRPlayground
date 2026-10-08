@@ -9,8 +9,13 @@ import UIKit
 import SnapKit
 
 class ProductImageCollectionViewCell: UICollectionViewCell {
+    // MARK: - Identifier
 	static let reuseIdentifier = "ProductImageCollectionViewCell"
-	
+    
+    // MARK: - Properties
+    private var imageTask: Task<Void, Never>?
+    
+    // MARK: - Views
 	private lazy var imageLoadingIndicator: UIActivityIndicatorView = {
 		let indicator = UIActivityIndicatorView(style: .large)
 		indicator.hidesWhenStopped = true
@@ -25,8 +30,7 @@ class ProductImageCollectionViewCell: UICollectionViewCell {
 		return imageView
 	}()
 	
-	private var imageTask: Task<Void, Never>?
-	
+    // MARK: - Overrides
 	override init(frame: CGRect) {
 		super.init(frame: frame)
 		configureView()
@@ -42,6 +46,7 @@ class ProductImageCollectionViewCell: UICollectionViewCell {
 	}
 }
 
+// MARK: - Support methods
 extension ProductImageCollectionViewCell {
 	private func configureView() {
 		contentView.addSubview(productImageView)
@@ -58,6 +63,11 @@ extension ProductImageCollectionViewCell {
 		
 		imageLoadingIndicator.startAnimating()
 	}
+    
+    private func cancelImageTask() {
+        imageTask?.cancel()
+        imageTask = nil
+    }
 }
 
 extension ProductImageCollectionViewCell {
@@ -87,10 +97,5 @@ extension ProductImageCollectionViewCell {
 		
 		productImageView.image = nil
 		imageLoadingIndicator.startAnimating()
-	}
-	
-	private func cancelImageTask() {
-		imageTask?.cancel()
-		imageTask = nil
 	}
 }

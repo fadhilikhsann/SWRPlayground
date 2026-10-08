@@ -9,18 +9,24 @@ import UIKit
 import SnapKit
 
 final class ProductImageTableViewCell: UITableViewCell {
+    // MARK: - Identifier
     static let reuseIdentifier = "ProductImageTableViewCell"
-	
-	typealias DATASOURCE = UICollectionViewDiffableDataSource<DefaultSection, ImageRow>
-	
-	private lazy var dataSource = DATASOURCE(collectionView: collectionView, cellProvider: makeCellProvider)
-
+    
+    // MARK: - Typealiases
+    typealias DATASOURCE = UICollectionViewDiffableDataSource<DefaultSection, ImageRow>
+    
+    // MARK: - Properties
+    private lazy var dataSource = DATASOURCE(collectionView: collectionView, cellProvider: makeCellProvider)
+    
+    private var imageLoader: ImageLoading?
+    
+    // MARK: - Views
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = 0
         layout.minimumInteritemSpacing = 0
-
+        
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
         collectionView.delegate = self
@@ -30,47 +36,49 @@ final class ProductImageTableViewCell: UITableViewCell {
             ProductImageCollectionViewCell.self,
             forCellWithReuseIdentifier: ProductImageCollectionViewCell.reuseIdentifier
         )
-		
+        
         return collectionView
     }()
-	
-	private lazy var pageControl: UIPageControl = {
-		let pageControl = UIPageControl()
-		
-		pageControl.hidesForSinglePage = true
-		
-		pageControl.pageIndicatorTintColor = .systemGray4
-		pageControl.currentPageIndicatorTintColor = .label
-		
-		pageControl.addAction(
-			.init(handler: { [weak self] _ in
-				guard let self else { return }
-				let currentPage = pageControl.currentPage
-				scrollToPage(currentPage)
-			}),
-			for: .valueChanged
-		)
-		
-		return pageControl
-	}()
-	
-	private var imageLoader: ImageLoading?
-
+    
+    private lazy var pageControl: UIPageControl = {
+        let pageControl = UIPageControl()
+        
+        pageControl.hidesForSinglePage = true
+        
+        pageControl.pageIndicatorTintColor = .systemGray4
+        pageControl.currentPageIndicatorTintColor = .label
+        
+        pageControl.addAction(
+            .init(handler: { [weak self] _ in
+                guard let self else { return }
+                let currentPage = pageControl.currentPage
+                scrollToPage(currentPage)
+            }),
+            for: .valueChanged
+        )
+        
+        return pageControl
+    }()
+    
+    // MARK: - Overrides
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         configureView()
     }
-
+    
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     override func prepareForReuse() {
         super.prepareForReuse()
         setIdle()
     }
+}
 
+// MARK: - Support methods
+extension ProductImageTableViewCell {
 	func configure(_ urls: [URL], imageLoader: ImageLoading) {
 		self.imageLoader = imageLoader
 		
@@ -170,6 +178,7 @@ extension ProductImageTableViewCell {
 	}
 }
 
+// MARK: - UICollectionViewDelegateFlowLayout
 extension ProductImageTableViewCell: UICollectionViewDelegateFlowLayout {
     func collectionView(
         _ collectionView: UICollectionView,

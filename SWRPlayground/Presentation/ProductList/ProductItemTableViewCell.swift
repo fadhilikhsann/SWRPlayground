@@ -79,7 +79,7 @@ final class ProductItemTableViewCell: UITableViewCell {
         return stackView
     }()
     
-    // MARK: - Init
+    // MARK: - Overrides
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         configureView()

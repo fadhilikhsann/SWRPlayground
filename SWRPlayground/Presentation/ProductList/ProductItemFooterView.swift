@@ -26,7 +26,7 @@ final class ProductItemFooterView: UITableViewHeaderFooterView {
         return label
     }()
 
-    // MARK: - Init
+    // MARK: - Overrides
     override init(reuseIdentifier: String?) {
         super.init(reuseIdentifier: reuseIdentifier)
         setupViews()

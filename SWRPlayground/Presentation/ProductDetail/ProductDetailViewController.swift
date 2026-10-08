@@ -9,10 +9,12 @@ import UIKit
 import SnapKit
 import Combine
 
-class ProductDetailViewController: UIViewController {
+class ProductDetailViewController: UITableViewController {
+    // MARK: - Typealiases
 	typealias DATASOURCE = UITableViewDiffableDataSource<DefaultSection, ProductDetailRow>
 	typealias STATE = TableViewState<ProductDetailTask, [ProductDetailRow]>
 	
+    // MARK: - Properties
 	private lazy var dataSource: DATASOURCE = {
 		let dataSource = DATASOURCE(tableView: tableView, cellProvider: makeCellProvider)
 		dataSource.defaultRowAnimation = .fade
@@ -21,32 +23,17 @@ class ProductDetailViewController: UIViewController {
 	
 	private var cancellables = Set<AnyCancellable>()
 	
-	private lazy var tableView: UITableView = {
-		let tableView = UITableView(frame: .zero, style: .plain)
-		
-		tableView.register(ProductImageTableViewCell.self, forCellReuseIdentifier: ProductImageTableViewCell.reuseIdentifier)
-		tableView.register(ProductDetailTableViewCell.self, forCellReuseIdentifier: ProductDetailTableViewCell.reuseIdentifier)
-		tableView.rowHeight = UITableView.automaticDimension
-		tableView.estimatedRowHeight = UITableView.automaticDimension
-		
-		tableView.separatorStyle = .none
-		
-		tableView.sectionHeaderTopPadding = 0
-		
-		return tableView
-	}()
-	
-	private lazy var refreshControl = UIRefreshControl()
-	
 	private let viewModel: ProductDetailViewModelProtocol
 	private let imageLoader: ImageLoading
+    
+    // MARK: - Init
 	init(
 		viewModel: ProductDetailViewModelProtocol,
 		imageLoader: ImageLoading
 	) {
 		self.viewModel = viewModel
 		self.imageLoader = imageLoader
-		super.init(nibName: nil, bundle: nil)
+        super.init(style: .plain)
 	}
 	
 	@available(*, unavailable)
@@ -54,6 +41,7 @@ class ProductDetailViewController: UIViewController {
 		fatalError("init(coder:) has not been implemented")
 	}
 	
+    // MARK: - Overrides
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		configureView()
@@ -66,21 +54,31 @@ class ProductDetailViewController: UIViewController {
 	}
 }
 
+// MARK: - Support methods
 extension ProductDetailViewController  {
 	private func configureView() {
+        /// NavigationBar
 		title = "Product Details"
 		
-		view.addSubview(tableView)
-		tableView.snp.makeConstraints { make in
-			make.edges.equalToSuperview()
-		}
+        /// TableView
+        tableView.register(ProductImageTableViewCell.self, forCellReuseIdentifier: ProductImageTableViewCell.reuseIdentifier)
+        tableView.register(ProductDetailTableViewCell.self, forCellReuseIdentifier: ProductDetailTableViewCell.reuseIdentifier)
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = UITableView.automaticDimension
+        
+        tableView.separatorStyle = .none
+        
+        tableView.sectionHeaderTopPadding = 0
+        
+        /// RefreshControl
+        let refreshControl = UIRefreshControl()
 		
 		refreshControl.addAction(.init(handler: { [weak self] _ in
 			guard let self else { return }
 			viewModel.refresh()
 		}), for: .valueChanged)
 		
-		tableView.refreshControl = refreshControl
+        self.refreshControl = refreshControl
 	}
 	
 	private func bindingViewModel() {
@@ -106,7 +104,7 @@ extension ProductDetailViewController  {
 			) as? ProductImageTableViewCell else {
 				return nil
 			}
-			cell.configure(viewModel.imageURLs, imageLoader: imageLoader)
+			cell.configure(viewModel.getImageURLs(), imageLoader: imageLoader)
 			return cell
 		case .detail:
 			guard let cell = tableView.dequeueReusableCell(
@@ -116,10 +114,10 @@ extension ProductDetailViewController  {
 				return nil
 			}
 			cell.configure(
-				title: viewModel.title,
-				category: viewModel.category,
-				price: viewModel.price,
-				description: viewModel.description
+				title: viewModel.getTitle(),
+				category: viewModel.getCategory(),
+				price: viewModel.getPrice(),
+				description: viewModel.getDescription()
 			)
 			return cell
 		}
@@ -148,7 +146,7 @@ extension ProductDetailViewController  {
 			applySnapshot(reconfigRows: rows)
 			
 		case .endTask:
-			refreshControl.endRefreshing()
+			refreshControl?.endRefreshing()
 			
 		case .errorMessage(let message):
 			showNonBlockingError(message)
