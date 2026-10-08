@@ -33,7 +33,7 @@ final class ProductListViewController: UITableViewController {
 	) {
 		self.viewModel = viewModel
 		self.imageLoader = imageLoader
-		super.init(nibName: nil, bundle: nil)
+        super.init(style: .plain)
 	}
 	
 	@available(*, unavailable)
@@ -102,6 +102,7 @@ final class ProductListViewController: UITableViewController {
 // MARK: - Support methods
 extension ProductListViewController {
     private func configureView() {
+        /// NavigationBar
         title = "Product Catalog"
         
         /// TableView
@@ -120,6 +121,7 @@ extension ProductListViewController {
         tableView.sectionFooterHeight = UITableView.automaticDimension
         tableView.estimatedSectionFooterHeight = UITableView.automaticDimension
         
+        /// RefreshControl
         let refreshControl = UIRefreshControl()
         
         refreshControl.addAction(.init(handler: { [weak self] _ in
