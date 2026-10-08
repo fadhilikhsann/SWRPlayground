@@ -7,18 +7,21 @@
 
 import Foundation
 
+// MARK: - Protocol
 protocol ProductAPIClient {
     func fetchProductList(request: PageRequest) async throws -> ProductResponseDTO
 	func fetchProductDetail(id: Int) async throws -> ProductDetailDTO
 }
 
-final class DefaultProductAPIClient: ProductAPIClient {
+final class DefaultProductAPIClient {
+    // MARK: - Properties
     private let host = "https://www.dummyjson.com"
     private let path = "/products"
     
     private let session: URLSession
     private let decoder: JSONDecoder
-
+    
+    // MARK: - Init
     init(
         session: URLSession = .shared,
         decoder: JSONDecoder = JSONDecoder()
@@ -26,7 +29,10 @@ final class DefaultProductAPIClient: ProductAPIClient {
         self.session = session
         self.decoder = decoder
     }
+}
 
+// MARK: - Conforms protocol
+extension DefaultProductAPIClient: ProductAPIClient {
     func fetchProductList(request: PageRequest) async throws -> ProductResponseDTO {
         guard var components = URLComponents(string: "\(host)\(path)") else {
             throw APIClientError.invalidURL

@@ -7,6 +7,7 @@
 
 import Foundation
 
+// MARK: - Protocol
 protocol ProductRepository {
 	func observeProductItemsByPage(
 		for request: PageRequest
@@ -14,15 +15,20 @@ protocol ProductRepository {
 	func observeProductDetail(id: Int) -> AsyncThrowingStream<ProductDetail, Error>
 }
 
-final class DefaultProductRepository: ProductRepository {
+final class DefaultProductRepository {
+    // MARK: - Properties
     private let apiClient: ProductAPIClient
     private let cache: ProductCaching
-
+    
+    // MARK: - Init
     init(apiClient: ProductAPIClient, cache: ProductCaching) {
         self.apiClient = apiClient
         self.cache = cache
     }
+}
 
+// MARK: - Conforms protocol
+extension DefaultProductRepository: ProductRepository {
     func observeProductItemsByPage(
         for request: PageRequest
     ) -> AsyncThrowingStream<ProductItemsByPage, Error> {

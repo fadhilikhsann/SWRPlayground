@@ -7,13 +7,17 @@
 
 import UIKit
 
+// MARK: - Protocol
 protocol ImageLoading {
 	func loadImage(from url: URL) async throws -> UIImage
 }
 
 final class ImageLoader {
+    // MARK: - Properties
 	private let session: URLSession
 	private let cache: ImageCaching
+    
+    // MARK: - Init
 	init(
 		session: URLSession = .shared,
 		cache: ImageCaching
@@ -23,11 +27,12 @@ final class ImageLoader {
 	}
 }
 
+// MARK: - Conforms protocol
 extension ImageLoader: ImageLoading {
-    /// Cache first
 	func loadImage(from url: URL) async throws -> UIImage {
 		try Task.checkCancellation()
 		
+        /// Cache first
 		if let cachedImage = cache.getImage(url: url) {
 			return cachedImage
 		}
@@ -39,6 +44,7 @@ extension ImageLoader: ImageLoading {
 	}
 }
 
+// MARK: - Support methods
 extension ImageLoader {
     private func fetchImage(from url: URL) async throws -> UIImage {
         let (data, response) = try await session.data(from: url)

@@ -7,6 +7,7 @@
 
 import Foundation
 
+// MARK: - Protocol
 protocol ProductCaching {
     func getProductItemsByPage(for request: PageRequest) -> ProductItemsByPage?
     func insertProductItemsByPage(_ page: ProductItemsByPage, for request: PageRequest)
@@ -15,44 +16,52 @@ protocol ProductCaching {
 	func insertProductDetail(_ product: ProductDetail)
 }
 
-final class ProductCache: ProductCaching {
+final class ProductCache {
+    // MARK: - Properties
     private let itemsByPageCache = NSCache<NSString, ProductItemsByPageCacheEntry>()
-	private let detailCache = NSCache<NSString, ProductDetailCacheEntry>()
-
+    private let detailCache = NSCache<NSString, ProductDetailCacheEntry>()
+    
+    // MARK: - Init
     init(
-		productItemsLimit: Int = 20,
-		productItemsTotalCostLimit: Int = 20 * 1024 * 1024,
-		productDetailLimit: Int = 200,
-		productDetailTotalCostLimit: Int = 20 * 1024 * 1024,
-	) {
-		itemsByPageCache.countLimit = productItemsLimit
-		itemsByPageCache.totalCostLimit = productItemsTotalCostLimit
-		detailCache.countLimit = productDetailLimit
-		detailCache.totalCostLimit = productDetailTotalCostLimit
+        productItemsLimit: Int = 20,
+        productItemsTotalCostLimit: Int = 20 * 1024 * 1024,
+        productDetailLimit: Int = 200,
+        productDetailTotalCostLimit: Int = 20 * 1024 * 1024,
+    ) {
+        itemsByPageCache.countLimit = productItemsLimit
+        itemsByPageCache.totalCostLimit = productItemsTotalCostLimit
+        detailCache.countLimit = productDetailLimit
+        detailCache.totalCostLimit = productDetailTotalCostLimit
     }
+}
 
+// MARK: - Conforms protocol
+extension ProductCache: ProductCaching {
     func getProductItemsByPage(for request: PageRequest) -> ProductItemsByPage? {
-		itemsByPageCache.object(forKey: generateProductItemsCacheKey(for: request))?.page
+        itemsByPageCache.object(forKey: generateProductItemsCacheKey(for: request))?.page
     }
-
+    
     func insertProductItemsByPage(_ page: ProductItemsByPage, for request: PageRequest) {
-		itemsByPageCache.setObject(
-			ProductItemsByPageCacheEntry(page: page),
-			forKey: generateProductItemsCacheKey(for: request)
-		)
+        itemsByPageCache.setObject(
+            ProductItemsByPageCacheEntry(page: page),
+            forKey: generateProductItemsCacheKey(for: request)
+        )
     }
-	
-	func getProductDetail(id: Int) -> ProductDetail? {
-		detailCache.object(forKey: generateProductDetailCacheKey(for: id))?.product
-	}
-	
-	func insertProductDetail(_ product: ProductDetail) {
-		detailCache.setObject(
-			ProductDetailCacheEntry(product: product),
-			forKey: generateProductDetailCacheKey(for: product.id)
-		)
-	}
+    
+    func getProductDetail(id: Int) -> ProductDetail? {
+        detailCache.object(forKey: generateProductDetailCacheKey(for: id))?.product
+    }
+    
+    func insertProductDetail(_ product: ProductDetail) {
+        detailCache.setObject(
+            ProductDetailCacheEntry(product: product),
+            forKey: generateProductDetailCacheKey(for: product.id)
+        )
+    }
+}
 
+// MARK: - Support methods
+extension ProductCache {
     private func generateProductItemsCacheKey(for request: PageRequest) -> NSString {
         "products-limit:\(request.limit)-skip:\(request.skip)" as NSString
     }

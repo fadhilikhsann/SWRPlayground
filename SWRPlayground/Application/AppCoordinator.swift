@@ -1,5 +1,3 @@
-import UIKit
-
 //
 //  AppCoordinator.swift
 //  SWRPlayground
@@ -7,6 +5,9 @@ import UIKit
 //  Created by Fadhil Ikhsanta's Personal on 25/09/26.
 //
 
+import UIKit
+
+// MARK: - Protocol
 @MainActor
 protocol AppCoordinatorDelegate: AnyObject {
 	func start()
@@ -15,8 +16,10 @@ protocol AppCoordinatorDelegate: AnyObject {
 
 @MainActor
 final class AppCoordinator {
+    // MARK: - Views
 	private let navigationController: UINavigationController
 	
+    // MARK: - Properties
 	private lazy var productCache = ProductCache()
 	private lazy var imageCache = ImageCache()
 	
@@ -25,11 +28,13 @@ final class AppCoordinator {
 	private lazy var apiClient = DefaultProductAPIClient()
 	private lazy var repository = DefaultProductRepository(apiClient: apiClient, cache: productCache)
 	
+    // MARK: - Init
 	init(navigationController: UINavigationController) {
 		self.navigationController = navigationController
 	}
 }
 
+// MARK: - Conforms protocol
 extension AppCoordinator: AppCoordinatorDelegate {
     func start() {
         let viewModel = ProductListViewModel(repository: repository)
