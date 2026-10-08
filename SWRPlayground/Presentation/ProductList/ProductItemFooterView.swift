@@ -9,10 +9,13 @@ import UIKit
 import SnapKit
 
 final class ProductItemFooterView: UITableViewHeaderFooterView {
+    // MARK: - Identifier
     static let reuseIdentifier = "ProductItemFooterView"
 
+    // MARK: - Properties
 	private let placeholder = "\t\t\t\t"
 	
+    // MARK: - Views
     private lazy var messageLabel: UILabel = {
         let label = UILabel()
         label.font = .preferredFont(forTextStyle: .subheadline)
@@ -23,6 +26,7 @@ final class ProductItemFooterView: UITableViewHeaderFooterView {
         return label
     }()
 
+    // MARK: - Init
     override init(reuseIdentifier: String?) {
         super.init(reuseIdentifier: reuseIdentifier)
         setupViews()
@@ -33,6 +37,7 @@ final class ProductItemFooterView: UITableViewHeaderFooterView {
     }
 }
 
+// MARK: - Support methods
 extension ProductItemFooterView {
     private func setupViews() {
         contentView.addSubview(messageLabel)

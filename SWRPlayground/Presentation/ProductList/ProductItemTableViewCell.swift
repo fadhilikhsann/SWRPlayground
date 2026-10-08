@@ -9,18 +9,32 @@ import UIKit
 import SnapKit
 
 final class ProductItemTableViewCell: UITableViewCell {
+    // MARK: - Identifier
     static let reuseIdentifier = "ProductItemTableViewCell"
-
-	private let titlePlaceholder = "\t\t\t\t\t\t\t\t"
-	private let categoryPlaceholder = "\t\t\t\t\t\t"
-	private let pricePlaceholder = "\t\t\t\t"
-	
-	private lazy var imageLoadingIndicator: UIActivityIndicatorView = {
-		let indicator = UIActivityIndicatorView(style: .medium)
-		indicator.hidesWhenStopped = true
-		return indicator
-	}()
-	
+    
+    // MARK: - Properties
+    private let titlePlaceholder = "\t\t\t\t\t\t\t\t"
+    private let categoryPlaceholder = "\t\t\t\t\t\t"
+    private let pricePlaceholder = "\t\t\t\t"
+    
+    private var imageTask: Task<Void, Never>?
+    
+    // MARK: - Formatters
+    private let priceFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "USD"
+        formatter.locale = Locale(identifier: "en_US")
+        return formatter
+    }()
+    
+    // MARK: - Views
+    private lazy var imageLoadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .medium)
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+    
     private lazy var thumbnailImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.backgroundColor = .secondarySystemBackground
@@ -30,7 +44,7 @@ final class ProductItemTableViewCell: UITableViewCell {
         imageView.tintColor = .tertiaryLabel
         return imageView
     }()
-
+    
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.font = .preferredFont(forTextStyle: .headline)
@@ -38,7 +52,7 @@ final class ProductItemTableViewCell: UITableViewCell {
         label.numberOfLines = 1
         return label
     }()
-
+    
     private lazy var categoryLabel: UILabel = {
         let label = UILabel()
         label.font = .preferredFont(forTextStyle: .subheadline)
@@ -47,16 +61,16 @@ final class ProductItemTableViewCell: UITableViewCell {
         label.numberOfLines = 1
         return label
     }()
-
+    
     private lazy var priceLabel: UILabel = {
         let label = UILabel()
         label.font = .preferredFont(forTextStyle: .headline)
         label.adjustsFontForContentSizeCategory = true
         label.textColor = .systemBlue
-		label.numberOfLines = 1
+        label.numberOfLines = 1
         return label
     }()
-
+    
     private lazy var labelsStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [titleLabel, categoryLabel, priceLabel])
         stackView.axis = .vertical
@@ -64,67 +78,71 @@ final class ProductItemTableViewCell: UITableViewCell {
         stackView.spacing = 7
         return stackView
     }()
-
-    private var imageTask: Task<Void, Never>?
-
+    
+    // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         configureView()
     }
-
+    
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     override func prepareForReuse() {
         super.prepareForReuse()
         setIdle()
     }
+}
 
-	func configure(with product: ProductItem, imageLoader: ImageLoading) {
-		titleLabel.backgroundColor = .clear
-		categoryLabel.backgroundColor = .clear
-		priceLabel.backgroundColor = .clear
-
+// MARK: - Support methods
+extension ProductItemTableViewCell {
+    func configure(with product: ProductItem, imageLoader: ImageLoading) {
+        titleLabel.backgroundColor = .clear
+        categoryLabel.backgroundColor = .clear
+        priceLabel.backgroundColor = .clear
+        
         titleLabel.text = product.title
         categoryLabel.text = product.category.capitalized
         priceLabel.text = priceFormatter.string(from: NSNumber(value: product.price))
-
+        
         guard let url = product.thumbnailURL else { return }
         imageTask = Task { [weak self] in
-			guard let self else { return }
-			
+            guard let self else { return }
+            
             do {
                 let image = try await imageLoader.loadImage(from: url)
                 try Task.checkCancellation()
-				imageLoadingIndicator.stopAnimating()
-				thumbnailImageView.image = image
+                imageLoadingIndicator.stopAnimating()
+                thumbnailImageView.image = image
             } catch is CancellationError {
-				/// Do nothing
+                /// Do nothing
             } catch {
-				/// Do nothing
+                /// Do nothing
             }
-			
-			imageTask = nil
+            
+            imageTask = nil
         }
     }
-	
-	func setIdle() {
-		cancelImageTask()
-		
-		titleLabel.backgroundColor = .secondarySystemBackground
-		categoryLabel.backgroundColor = .secondarySystemBackground
-		priceLabel.backgroundColor = .secondarySystemBackground
-		
-		titleLabel.text = titlePlaceholder
-		categoryLabel.text = categoryPlaceholder
-		priceLabel.text = pricePlaceholder
-		
-		thumbnailImageView.image = nil
-		imageLoadingIndicator.startAnimating()
-	}
+    
+    func setIdle() {
+        cancelImageTask()
+        
+        titleLabel.backgroundColor = .secondarySystemBackground
+        categoryLabel.backgroundColor = .secondarySystemBackground
+        priceLabel.backgroundColor = .secondarySystemBackground
+        
+        titleLabel.text = titlePlaceholder
+        categoryLabel.text = categoryPlaceholder
+        priceLabel.text = pricePlaceholder
+        
+        thumbnailImageView.image = nil
+        imageLoadingIndicator.startAnimating()
+    }
+}
 
+extension ProductItemTableViewCell {
     private func configureView() {
         selectionStyle = .none
         contentView.addSubview(thumbnailImageView)
@@ -149,14 +167,6 @@ final class ProductItemTableViewCell: UITableViewCell {
             make.bottom.lessThanOrEqualToSuperview().inset(16)
         }
     }
-
-    private let priceFormatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.locale = Locale(identifier: "en_US")
-        return formatter
-    }()
 	
 	private func cancelImageTask() {
 		imageTask?.cancel()

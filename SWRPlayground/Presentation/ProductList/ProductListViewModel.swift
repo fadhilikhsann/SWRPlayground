@@ -8,6 +8,7 @@
 import Combine
 import Foundation
 
+// MARK: - Protocol
 @MainActor
 protocol ProductListViewModelProtocol: AnyObject {
 	var statePublisher: AnyPublisher<TableViewState<ProductListTask, ProductListConfig>, Never> { get }
@@ -22,33 +23,42 @@ protocol ProductListViewModelProtocol: AnyObject {
 }
 
 @MainActor
-final class ProductListViewModel: ProductListViewModelProtocol {
-	typealias STATE = TableViewState<ProductListTask, ProductListConfig>
-	
-	weak var coordinator: AppCoordinatorDelegate?
-	
-	@Published private var state: STATE = .start
-	var statePublisher: AnyPublisher<STATE, Never> {
-		$state.eraseToAnyPublisher()
-	}
-	
-	private var loadTask: Task<Void, Never>?
-	
-	private var products: [ProductItem] = []
-	private var productIndexesById: [ProductItem.ID: Int] = [:]
-	private var totalProductsCount = 0
-	
-	private let repository: ProductRepository
-	private let pageSize: Int
-	init(pageSize: Int = 20, repository: ProductRepository) {
-		self.pageSize = pageSize
-		self.repository = repository
-	}
-	
-	deinit {
-		loadTask?.cancel()
-	}
-	
+final class ProductListViewModel {
+    // MARK: - Typealiases
+    typealias STATE = TableViewState<ProductListTask, ProductListConfig>
+    
+    // MARK: - Properties
+    weak var coordinator: AppCoordinatorDelegate?
+    
+    @Published private var state: STATE = .start
+
+    
+    private var loadTask: Task<Void, Never>?
+    
+    private var products: [ProductItem] = []
+    private var productIndexesById: [ProductItem.ID: Int] = [:]
+    private var totalProductsCount = 0
+    
+    private let repository: ProductRepository
+    private let pageSize: Int
+    
+    // MARK: - Init
+    init(pageSize: Int = 20, repository: ProductRepository) {
+        self.pageSize = pageSize
+        self.repository = repository
+    }
+    
+    deinit {
+        loadTask?.cancel()
+    }
+}
+
+// MARK: - Conforms protocol
+extension ProductListViewModel: ProductListViewModelProtocol {
+    var statePublisher: AnyPublisher<STATE, Never> {
+        $state.eraseToAnyPublisher()
+    }
+    
 	func start() {
 		guard state == .start else { return }
 		executeTaskIfNeeded(.refresh)
@@ -72,6 +82,7 @@ final class ProductListViewModel: ProductListViewModelProtocol {
 	}
 }
 
+// MARK: - Support methods
 extension ProductListViewModel {
 	private func executeTaskIfNeeded(_ task: ProductListTask) {
 		guard pageSize > 0 else {

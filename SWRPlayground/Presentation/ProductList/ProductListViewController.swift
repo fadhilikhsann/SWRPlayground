@@ -9,10 +9,12 @@ import UIKit
 import SnapKit
 import Combine
 
-final class ProductListViewController: UIViewController {
+final class ProductListViewController: UITableViewController {
+    // MARK: - Typealiases
 	typealias DATASOURCE = UITableViewDiffableDataSource<DefaultSection, ProductItemRow>
 	typealias STATE = TableViewState<ProductListTask, ProductListConfig>
 	
+    // MARK: - Properties
 	private lazy var dataSource: DATASOURCE = {
 		let dataSource = DATASOURCE(tableView: tableView, cellProvider: makeCellProvider)
 		dataSource.defaultRowAnimation = .fade
@@ -21,30 +23,10 @@ final class ProductListViewController: UIViewController {
 	
 	private var cancellables = Set<AnyCancellable>()
 	
-	private lazy var tableView: UITableView = {
-		let tableView = UITableView(frame: .zero, style: .plain)
-		tableView.separatorInset = UIEdgeInsets(top: 0, left: 132, bottom: 0, right: 16)
-		
-		tableView.delegate = self
-		
-		tableView.register(ProductItemTableViewCell.self, forCellReuseIdentifier: ProductItemTableViewCell.reuseIdentifier)
-		tableView.rowHeight = UITableView.automaticDimension
-		tableView.estimatedRowHeight = UITableView.automaticDimension
-		
-		tableView.register(
-			ProductItemFooterView.self,
-			forHeaderFooterViewReuseIdentifier: ProductItemFooterView.reuseIdentifier
-		)
-		tableView.sectionFooterHeight = UITableView.automaticDimension
-		tableView.estimatedSectionFooterHeight = UITableView.automaticDimension
-		
-		return tableView
-	}()
-	
-	private lazy var refreshControl = UIRefreshControl()
-	
 	private let viewModel: ProductListViewModelProtocol
 	private let imageLoader: ImageLoading
+    
+    // MARK: - Init
 	init(
 		viewModel: ProductListViewModelProtocol,
 		imageLoader: ImageLoading
@@ -59,6 +41,7 @@ final class ProductListViewController: UIViewController {
 		fatalError("init(coder:) has not been implemented")
 	}
 	
+    // MARK: - Overrides
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		configureView()
@@ -69,23 +52,82 @@ final class ProductListViewController: UIViewController {
 		super.viewWillAppear(animated)
 		navigationController?.navigationBar.prefersLargeTitles = true
 	}
+    
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        let snapshot = dataSource.snapshot()
+        guard let sectionId = snapshot.sectionIdentifiers[safe: indexPath.section] else { return }
+        
+        guard case .main = sectionId else { return }
+        
+        let rows = snapshot.itemIdentifiers(inSection: sectionId)
+        
+        let thresholdIndex = max(0, rows.count - 5)
+        if indexPath.row >= thresholdIndex, case .item(_) = rows[thresholdIndex] {
+            viewModel.request(.loadMore)
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        guard let sectionId = dataSource.snapshot().sectionIdentifiers[safe: section],
+              case .main = sectionId else {
+            return nil
+        }
+        
+        guard let footerView = tableView.dequeueReusableHeaderFooterView(
+            withIdentifier: ProductItemFooterView.reuseIdentifier
+        ) as? ProductItemFooterView else {
+            return nil
+        }
+        
+        return footerView
+    }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let snapshot = dataSource.snapshot()
+        let section = indexPath.section
+        let row = indexPath.row
+        
+        guard let sectionId = snapshot.sectionIdentifiers[safe: section],
+              case .main = sectionId,
+              let row = snapshot.itemIdentifiers(inSection: sectionId)[safe: row],
+              case .item(let id) = row
+        else {
+            return
+        }
+        
+        viewModel.didSelectProduct(id: id)
+    }
 }
 
+// MARK: - Support methods
 extension ProductListViewController {
     private func configureView() {
         title = "Product Catalog"
-
-        view.addSubview(tableView)
-        tableView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-
-		refreshControl.addAction(.init(handler: { [weak self] _ in
-			guard let self else { return }
-			viewModel.request(.refresh)
-		}), for: .valueChanged)
-		
-        tableView.refreshControl = refreshControl
+        
+        /// TableView
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 132, bottom: 0, right: 16)
+        
+        tableView.delegate = self
+        
+        tableView.register(ProductItemTableViewCell.self, forCellReuseIdentifier: ProductItemTableViewCell.reuseIdentifier)
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = UITableView.automaticDimension
+        
+        tableView.register(
+            ProductItemFooterView.self,
+            forHeaderFooterViewReuseIdentifier: ProductItemFooterView.reuseIdentifier
+        )
+        tableView.sectionFooterHeight = UITableView.automaticDimension
+        tableView.estimatedSectionFooterHeight = UITableView.automaticDimension
+        
+        let refreshControl = UIRefreshControl()
+        
+        refreshControl.addAction(.init(handler: { [weak self] _ in
+            guard let self else { return }
+            viewModel.request(.refresh)
+        }), for: .valueChanged)
+        
+        self.refreshControl = refreshControl
     }
 	
 	private func bindingViewModel() {
@@ -151,14 +193,14 @@ extension ProductListViewController {
 			case .refresh:
 				break
 			case .loadMore:
-				refreshControl.endRefreshing()
+				refreshControl?.endRefreshing()
 			}
 			
 		case .resultTask(let config, _):
 			applySnapshot(ids: config.ids, reconfigIds: config.reconfigIds)
 			
 		case .endTask:
-			refreshControl.endRefreshing()
+			refreshControl?.endRefreshing()
 			
 		case .errorMessage(let message):
 			showNonBlockingError(message)
@@ -206,51 +248,4 @@ extension ProductListViewController {
         alert.addAction(UIAlertAction(title: "Close", style: .default))
         present(alert, animated: true)
     }
-}
-
-extension ProductListViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-		let snapshot = dataSource.snapshot()
-		guard let sectionId = snapshot.sectionIdentifiers[safe: indexPath.section] else { return }
-		
-		guard case .main = sectionId else { return }
-		
-		let rows = snapshot.itemIdentifiers(inSection: sectionId)
-		
-		let thresholdIndex = max(0, rows.count - 5)
-		if indexPath.row >= thresholdIndex, case .item(_) = rows[thresholdIndex] {
-			viewModel.request(.loadMore)
-		}
-    }
-	
-	func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-		guard let sectionId = dataSource.snapshot().sectionIdentifiers[safe: section],
-			  case .main = sectionId else {
-			return nil
-		}
-		
-		guard let footerView = tableView.dequeueReusableHeaderFooterView(
-			withIdentifier: ProductItemFooterView.reuseIdentifier
-		) as? ProductItemFooterView else {
-			return nil
-		}
-		
-		return footerView
-	}
-	
-	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-		let snapshot = dataSource.snapshot()
-		let section = indexPath.section
-		let row = indexPath.row
-		
-		guard let sectionId = snapshot.sectionIdentifiers[safe: section],
-			  case .main = sectionId,
-			  let row = snapshot.itemIdentifiers(inSection: sectionId)[safe: row],
-			  case .item(let id) = row
-		else {
-			return
-		}
-		
-		viewModel.didSelectProduct(id: id)
-	}
 }
