@@ -8,7 +8,7 @@
 import Foundation
 
 // MARK: - Protocol
-protocol ProductCaching {
+protocol ProductCaching: Actor {
     func getProductItemsByPage(for request: PageRequest) -> ProductItemsByPage?
     func insertProductItemsByPage(_ page: ProductItemsByPage, for request: PageRequest)
 	
@@ -16,7 +16,7 @@ protocol ProductCaching {
 	func insertProductDetail(_ product: ProductDetail)
 }
 
-final class ProductCache {
+actor ProductCache {
     // MARK: - Properties
     private let itemsByPageCache = NSCache<NSString, ProductItemsByPageCacheEntry>()
     private let detailCache = NSCache<NSString, ProductDetailCacheEntry>()
@@ -55,7 +55,7 @@ extension ProductCache: ProductCaching {
     func insertProductDetail(_ product: ProductDetail) {
         detailCache.setObject(
             ProductDetailCacheEntry(product: product),
-            forKey: generateProductDetailCacheKey(for: product.id)
+            forKey: generateProductDetailCacheKey(for: product.id),
         )
     }
 }

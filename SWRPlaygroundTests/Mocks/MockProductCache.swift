@@ -7,7 +7,7 @@
 
 @testable import SWRPlayground
 
-final class MockProductCache: ProductCaching {
+actor MockProductCache: ProductCaching {
     var getProductItemsByPageCallCount: Int = 0
     var insertProductItemsByPageCallCount: Int = 0
     var getProductDetailCallCount: Int = 0

@@ -33,13 +33,13 @@ extension ImageLoader: ImageLoading {
 		try Task.checkCancellation()
 		
         /// Cache first
-		if let cachedImage = cache.getImage(url: url) {
+		if let cachedImage = await cache.getImage(url: url) {
 			return cachedImage
 		}
 		
 		let image = try await fetchImage(from: url)
 		try Task.checkCancellation()
-		cache.insertImage(image, url: url)
+        await cache.insertImage(image, url: url)
 		return image
 	}
 }

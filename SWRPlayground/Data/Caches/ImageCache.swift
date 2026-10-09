@@ -8,12 +8,12 @@
 import UIKit
 
 // MARK: - Protocol
-protocol ImageCaching {
+protocol ImageCaching: Actor {
 	func getImage(url: URL) -> UIImage?
 	func insertImage(_ image: UIImage, url: URL)
 }
 
-final class ImageCache {
+actor ImageCache {
     // MARK: - Properties
     private let cache = NSCache<NSURL, UIImage>()
     

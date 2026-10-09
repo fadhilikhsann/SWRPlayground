@@ -27,31 +27,31 @@ final class ProductCacheTests: XCTestCase {
     }
 
     // MARK: - ProductItemsByPage cache tests
-    func testGetProductItemsByPage_whenNoItemCached_returnsNil() {
+    func testGetProductItemsByPage_whenNoItemCached_returnsNil() async {
         // Given
         let request = makePageRequest(limit: 20, skip: 0)
 
         // When
-        let cachedPage = sut.getProductItemsByPage(for: request)
+        let cachedPage = await sut.getProductItemsByPage(for: request)
 
         // Then
         XCTAssertNil(cachedPage)
     }
 
-    func testGetProductItemsByPage_whenItemCached_returnsCachedProductItemsByPage() {
+    func testGetProductItemsByPage_whenItemCached_returnsCachedProductItemsByPage() async {
         // Given
         let request = makePageRequest(limit: 20, skip: 0)
         let page = makeProductItemsByPage(skip: 0, limit: 20)
 
         // When
-        sut.insertProductItemsByPage(page, for: request)
-        let cachedPage = sut.getProductItemsByPage(for: request)
+        await sut.insertProductItemsByPage(page, for: request)
+        let cachedPage = await sut.getProductItemsByPage(for: request)
 
         // Then
         XCTAssertEqual(cachedPage, page)
     }
 
-    func testGetProductItemsByPage_whenRequestHasDifferentLimitOrSkip_returnsNilForNonMatchingRequest() {
+    func testGetProductItemsByPage_whenRequestHasDifferentLimitOrSkip_returnsNilForNonMatchingRequest() async {
         // Given
         let request1 = makePageRequest(limit: 20, skip: 0)
         let page1 = makeProductItemsByPage(
@@ -70,16 +70,20 @@ final class ProductCacheTests: XCTestCase {
         let nonCachedRequest = makePageRequest(limit: 10, skip: 0)
 
         // When
-        sut.insertProductItemsByPage(page1, for: request1)
-        sut.insertProductItemsByPage(page2, for: request2)
+        await sut.insertProductItemsByPage(page1, for: request1)
+        await sut.insertProductItemsByPage(page2, for: request2)
 
         // Then
-        XCTAssertEqual(sut.getProductItemsByPage(for: request1), page1)
-        XCTAssertEqual(sut.getProductItemsByPage(for: request2), page2)
-        XCTAssertNil(sut.getProductItemsByPage(for: nonCachedRequest))
+        let getProductItemsByPageForRequest1 = await sut.getProductItemsByPage(for: request1)
+        let getProductItemsByPageForRequest2 = await sut.getProductItemsByPage(for: request2)
+        let getProductItemsByPageForNonCachedRequest = await sut.getProductItemsByPage(for: nonCachedRequest)
+        
+        XCTAssertEqual(getProductItemsByPageForRequest1, page1)
+        XCTAssertEqual(getProductItemsByPageForRequest2, page2)
+        XCTAssertNil(getProductItemsByPageForNonCachedRequest)
     }
 
-    func testInsertProductItemsByPage_whenOverwritingExistingPage_updatesCachedValue() {
+    func testInsertProductItemsByPage_whenOverwritingExistingPage_updatesCachedValue() async {
         // Given
         let request = makePageRequest(limit: 20, skip: 0)
         let initialPage = makeProductItemsByPage(
@@ -92,71 +96,79 @@ final class ProductCacheTests: XCTestCase {
         )
 
         // When
-        sut.insertProductItemsByPage(initialPage, for: request)
-        XCTAssertEqual(sut.getProductItemsByPage(for: request), initialPage)
+        await sut.insertProductItemsByPage(initialPage, for: request)
+        var cachedPage = await sut.getProductItemsByPage(for: request)
+        XCTAssertEqual(cachedPage, initialPage)
 
-        sut.insertProductItemsByPage(updatedPage, for: request)
+        await sut.insertProductItemsByPage(updatedPage, for: request)
 
         // Then
-        XCTAssertEqual(sut.getProductItemsByPage(for: request), updatedPage)
+        cachedPage = await sut.getProductItemsByPage(for: request)
+        XCTAssertEqual(cachedPage, updatedPage)
     }
 
     // MARK: - ProductDetail cache tests
-    func testGetProductDetail_whenNoProductCached_returnsNil() {
+    func testGetProductDetail_whenNoProductCached_returnsNil() async {
         // Given
         let productId = 1
 
         // When
-        let cachedDetail = sut.getProductDetail(id: productId)
+        let cachedDetail = await sut.getProductDetail(id: productId)
 
         // Then
         XCTAssertNil(cachedDetail)
     }
 
-    func testGetProductDetail_whenProductCached_returnsCachedProductDetail() {
+    func testGetProductDetail_whenProductCached_returnsCachedProductDetail() async {
         // Given
         let detail = makeProductDetail(id: 1, title: "Mascara")
 
         // When
-        sut.insertProductDetail(detail)
-        let cachedDetail = sut.getProductDetail(id: detail.id)
+        await sut.insertProductDetail(detail)
 
         // Then
+        let cachedDetail = await sut.getProductDetail(id: detail.id)
         XCTAssertEqual(cachedDetail, detail)
     }
 
-    func testGetProductDetail_whenRequestingDifferentId_returnsNilForNonMatchingId() {
+    func testGetProductDetail_whenRequestingDifferentId_returnsNilForNonMatchingId() async {
         // Given
         let detail1 = makeProductDetail(id: 1, title: "Product 1")
         let detail2 = makeProductDetail(id: 2, title: "Product 2")
 
         // When
-        sut.insertProductDetail(detail1)
-        sut.insertProductDetail(detail2)
+        await sut.insertProductDetail(detail1)
+        await sut.insertProductDetail(detail2)
 
         // Then
-        XCTAssertEqual(sut.getProductDetail(id: 1), detail1)
-        XCTAssertEqual(sut.getProductDetail(id: 2), detail2)
-        XCTAssertNil(sut.getProductDetail(id: 999))
+        let getProductDetailForId1 = await sut.getProductDetail(id: 1)
+        let getProductDetailForId2 = await sut.getProductDetail(id: 2)
+        let getProductDetailForNonExistingId = await sut.getProductDetail(id: 999)
+        
+        XCTAssertEqual(getProductDetailForId1, detail1)
+        XCTAssertEqual(getProductDetailForId2, detail2)
+        XCTAssertNil(getProductDetailForNonExistingId)
     }
 
-    func testInsertProductDetail_whenOverwritingExistingDetail_updatesCachedValue() {
+    func testInsertProductDetail_whenOverwritingExistingDetail_updatesCachedValue() async {
         // Given
         let initialDetail = makeProductDetail(id: 1, title: "Original Title", price: 10.0)
         let updatedDetail = makeProductDetail(id: 1, title: "Updated Title", price: 20.0)
 
         // When
-        sut.insertProductDetail(initialDetail)
-        XCTAssertEqual(sut.getProductDetail(id: 1), initialDetail)
+        await sut.insertProductDetail(initialDetail)
+        var cachedData = await sut.getProductDetail(id: 1)
+        XCTAssertEqual(cachedData, initialDetail)
 
-        sut.insertProductDetail(updatedDetail)
+        await sut.insertProductDetail(updatedDetail)
 
         // Then
-        XCTAssertEqual(sut.getProductDetail(id: 1), updatedDetail)
+        cachedData = await sut.getProductDetail(id: 1)
+        XCTAssertEqual(cachedData, updatedDetail)
     }
 
     // MARK: - Initialization tests
-    func testInit_withCustomLimits_functionsCorrectly() {
+    func testInit_withCustomLimits_functionsCorrectly() async {
         // Given
         let customCache = ProductCache(
             productItemsLimit: 5,
@@ -169,12 +181,15 @@ final class ProductCacheTests: XCTestCase {
         let detail = makeProductDetail(id: 42)
 
         // When
-        customCache.insertProductItemsByPage(page, for: request)
-        customCache.insertProductDetail(detail)
+        await customCache.insertProductItemsByPage(page, for: request)
+        await customCache.insertProductDetail(detail)
 
         // Then
-        XCTAssertEqual(customCache.getProductItemsByPage(for: request), page)
-        XCTAssertEqual(customCache.getProductDetail(id: 42), detail)
+        let getProductItems = await customCache.getProductItemsByPage(for: request)
+        let getProductDetail = await customCache.getProductDetail(id: 42)
+        
+        XCTAssertEqual(getProductItems, page)
+        XCTAssertEqual(getProductDetail, detail)
     }
 }
 

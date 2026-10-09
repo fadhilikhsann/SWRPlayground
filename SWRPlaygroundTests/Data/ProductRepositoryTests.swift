@@ -47,11 +47,14 @@ final class ProductRepositoryTests: XCTestCase {
         }
 
         // Then
+        let getProductItemsByPageCallCount = await cache.getProductItemsByPageCallCount
+        let insertProductItemsByPageCallCount = await cache.insertProductItemsByPageCallCount
+        
         XCTAssertEqual(emittedPages.count, 1)
         XCTAssertEqual(emittedPages.first, expectedPage)
-        XCTAssertEqual(cache.getProductItemsByPageCallCount, 1)
+        XCTAssertEqual(getProductItemsByPageCallCount, 1)
         XCTAssertEqual(apiClient.fetchProductListCallCount, 1)
-        XCTAssertEqual(cache.insertProductItemsByPageCallCount, 1)
+        XCTAssertEqual(insertProductItemsByPageCallCount, 1)
     }
 
     func testObserveProductItemsByPage_whenCacheHasDataAndNetworkSucceeds_emitsCachedThenNetworkPageAndUpdatesCache() async throws {
@@ -62,7 +65,7 @@ final class ProductRepositoryTests: XCTestCase {
             skip: 0,
             limit: 20
         )
-        cache.insertProductItemsByPage(cachedPage, for: request)
+        await cache.insertProductItemsByPage(cachedPage, for: request)
 
         let networkResponseDTO = makeProductResponseDTO(
             products: [makeProductItemDTO(id: 2, title: "Network Product")],
@@ -79,12 +82,15 @@ final class ProductRepositoryTests: XCTestCase {
         }
 
         // Then
+        let getProductItemsByPageCallCount = await cache.getProductItemsByPageCallCount
+        let insertProductItemsByPageCallCount = await cache.insertProductItemsByPageCallCount
+        
         XCTAssertEqual(emittedPages.count, 2)
         XCTAssertEqual(emittedPages.first, cachedPage)
         XCTAssertEqual(emittedPages.last, expectedNetworkPage)
-        XCTAssertEqual(cache.getProductItemsByPageCallCount, 1)
+        XCTAssertEqual(getProductItemsByPageCallCount, 1)
         XCTAssertEqual(apiClient.fetchProductListCallCount, 1)
-        XCTAssertEqual(cache.insertProductItemsByPageCallCount, 2)
+        XCTAssertEqual(insertProductItemsByPageCallCount, 2)
     }
 
     func testObserveProductItemsByPage_whenCachedDataEqualsNetworkData_emitsOnlyCachedPageAndUpdatesCache() async throws {
@@ -97,7 +103,7 @@ final class ProductRepositoryTests: XCTestCase {
             limit: 20
         )
         let expectedPage = networkResponseDTO.toDomain()
-        cache.insertProductItemsByPage(expectedPage, for: request)
+        await cache.insertProductItemsByPage(expectedPage, for: request)
         apiClient.fetchProductListResult = .success(networkResponseDTO)
 
         // When
@@ -107,11 +113,14 @@ final class ProductRepositoryTests: XCTestCase {
         }
 
         // Then
+        let getProductItemsByPageCallCount = await cache.getProductItemsByPageCallCount
+        let insertProductItemsByPageCallCount = await cache.insertProductItemsByPageCallCount
+        
         XCTAssertEqual(emittedPages.count, 1)
         XCTAssertEqual(emittedPages.first, expectedPage)
-        XCTAssertEqual(cache.getProductItemsByPageCallCount, 1)
+        XCTAssertEqual(getProductItemsByPageCallCount, 1)
         XCTAssertEqual(apiClient.fetchProductListCallCount, 1)
-        XCTAssertEqual(cache.insertProductItemsByPageCallCount, 2)
+        XCTAssertEqual(insertProductItemsByPageCallCount, 2)
     }
 
     func testObserveProductItemsByPage_whenCacheIsEmptyAndNetworkFails_throwsErrorAndDoesNotInsertIntoCache() async throws {
@@ -132,11 +141,14 @@ final class ProductRepositoryTests: XCTestCase {
         }
 
         // Then
+        let getProductItemsByPageCallCount = await cache.getProductItemsByPageCallCount
+        let insertProductItemsByPageCallCount = await cache.insertProductItemsByPageCallCount
+        
         XCTAssertTrue(emittedPages.isEmpty)
         XCTAssertEqual((caughtError as? MockLocalizedError)?.errorDescription, expectedError.errorDescription)
-        XCTAssertEqual(cache.getProductItemsByPageCallCount, 1)
+        XCTAssertEqual(getProductItemsByPageCallCount, 1)
         XCTAssertEqual(apiClient.fetchProductListCallCount, 1)
-        XCTAssertEqual(cache.insertProductItemsByPageCallCount, 0)
+        XCTAssertEqual(insertProductItemsByPageCallCount, 0)
     }
 
     func testObserveProductItemsByPage_whenCacheHasDataAndNetworkFails_emitsCachedPageThenThrowsError() async throws {
@@ -147,7 +159,7 @@ final class ProductRepositoryTests: XCTestCase {
             skip: 0,
             limit: 20
         )
-        cache.insertProductItemsByPage(cachedPage, for: request)
+        await cache.insertProductItemsByPage(cachedPage, for: request)
 
         let expectedError = MockLocalizedError(errorDescription: "Network failure after cache hit.")
         apiClient.fetchProductListResult = .failure(expectedError)
@@ -164,12 +176,15 @@ final class ProductRepositoryTests: XCTestCase {
         }
 
         // Then
+        let getProductItemsByPageCallCount = await cache.getProductItemsByPageCallCount
+        let insertProductItemsByPageCallCount = await cache.insertProductItemsByPageCallCount
+        
         XCTAssertEqual(emittedPages.count, 1)
         XCTAssertEqual(emittedPages.first, cachedPage)
         XCTAssertEqual((caughtError as? MockLocalizedError)?.errorDescription, expectedError.errorDescription)
-        XCTAssertEqual(cache.getProductItemsByPageCallCount, 1)
+        XCTAssertEqual(getProductItemsByPageCallCount, 1)
         XCTAssertEqual(apiClient.fetchProductListCallCount, 1)
-        XCTAssertEqual(cache.insertProductItemsByPageCallCount, 1)
+        XCTAssertEqual(insertProductItemsByPageCallCount, 1)
     }
 
     func testObserveProductItemsByPage_whenTaskIsCancelled_finishesWithoutThrowingError() async throws {
@@ -212,18 +227,21 @@ final class ProductRepositoryTests: XCTestCase {
         }
 
         // Then
+        let getProductDetailCallCount = await cache.getProductDetailCallCount
+        let insertProductDetailCallCount = await cache.insertProductDetailCallCount
+        
         XCTAssertEqual(emittedDetails.count, 1)
         XCTAssertEqual(emittedDetails.first, expectedDetail)
-        XCTAssertEqual(cache.getProductDetailCallCount, 1)
+        XCTAssertEqual(getProductDetailCallCount, 1)
         XCTAssertEqual(apiClient.fetchProductDetailCallCount, 1)
-        XCTAssertEqual(cache.insertProductDetailCallCount, 1)
+        XCTAssertEqual(insertProductDetailCallCount, 1)
     }
 
     func testObserveProductDetail_whenCacheHasDataAndNetworkSucceeds_emitsCachedThenNetworkDetailAndUpdatesCache() async throws {
         // Given
         let productId = 1
         let cachedDetail = makeProductDetail(id: productId, title: "Cached Product Detail")
-        cache.insertProductDetail(cachedDetail)
+        await cache.insertProductDetail(cachedDetail)
 
         let networkDetailDTO = makeProductDetailDTO(id: productId, title: "Network Product Detail")
         let expectedNetworkDetail = networkDetailDTO.toDomain()
@@ -236,12 +254,15 @@ final class ProductRepositoryTests: XCTestCase {
         }
 
         // Then
+        let getProductDetailCallCount = await cache.getProductDetailCallCount
+        let insertProductDetailCallCount = await cache.insertProductDetailCallCount
+        
         XCTAssertEqual(emittedDetails.count, 2)
         XCTAssertEqual(emittedDetails.first, cachedDetail)
         XCTAssertEqual(emittedDetails.last, expectedNetworkDetail)
-        XCTAssertEqual(cache.getProductDetailCallCount, 1)
+        XCTAssertEqual(getProductDetailCallCount, 1)
         XCTAssertEqual(apiClient.fetchProductDetailCallCount, 1)
-        XCTAssertEqual(cache.insertProductDetailCallCount, 2)
+        XCTAssertEqual(insertProductDetailCallCount, 2)
     }
 
     func testObserveProductDetail_whenCachedDataEqualsNetworkData_emitsOnlyCachedDetailAndUpdatesCache() async throws {
@@ -249,7 +270,7 @@ final class ProductRepositoryTests: XCTestCase {
         let productId = 1
         let detailDTO = makeProductDetailDTO(id: productId, title: "Same Detail Product")
         let expectedDetail = detailDTO.toDomain()
-        cache.insertProductDetail(expectedDetail)
+        await cache.insertProductDetail(expectedDetail)
         apiClient.fetchProductDetailResult = .success(detailDTO)
 
         // When
@@ -259,11 +280,14 @@ final class ProductRepositoryTests: XCTestCase {
         }
 
         // Then
+        let getProductDetailCallCount = await cache.getProductDetailCallCount
+        let insertProductDetailCallCount = await cache.insertProductDetailCallCount
+        
         XCTAssertEqual(emittedDetails.count, 1)
         XCTAssertEqual(emittedDetails.first, expectedDetail)
-        XCTAssertEqual(cache.getProductDetailCallCount, 1)
+        XCTAssertEqual(getProductDetailCallCount, 1)
         XCTAssertEqual(apiClient.fetchProductDetailCallCount, 1)
-        XCTAssertEqual(cache.insertProductDetailCallCount, 2)
+        XCTAssertEqual(insertProductDetailCallCount, 2)
     }
 
     func testObserveProductDetail_whenCacheIsEmptyAndNetworkFails_throwsErrorAndDoesNotInsertIntoCache() async throws {
@@ -284,18 +308,21 @@ final class ProductRepositoryTests: XCTestCase {
         }
 
         // Then
+        let getProductDetailCallCount = await cache.getProductDetailCallCount
+        let insertProductDetailCallCount = await cache.insertProductDetailCallCount
+        
         XCTAssertTrue(emittedDetails.isEmpty)
         XCTAssertEqual((caughtError as? MockLocalizedError)?.errorDescription, expectedError.errorDescription)
-        XCTAssertEqual(cache.getProductDetailCallCount, 1)
+        XCTAssertEqual(getProductDetailCallCount, 1)
         XCTAssertEqual(apiClient.fetchProductDetailCallCount, 1)
-        XCTAssertEqual(cache.insertProductDetailCallCount, 0)
+        XCTAssertEqual(insertProductDetailCallCount, 0)
     }
 
     func testObserveProductDetail_whenCacheHasDataAndNetworkFails_emitsCachedDetailThenThrowsError() async throws {
         // Given
         let productId = 1
         let cachedDetail = makeProductDetail(id: productId, title: "Cached Detail")
-        cache.insertProductDetail(cachedDetail)
+        await cache.insertProductDetail(cachedDetail)
 
         let expectedError = MockLocalizedError(errorDescription: "Detail network failure after cache hit.")
         apiClient.fetchProductDetailResult = .failure(expectedError)
@@ -312,12 +339,15 @@ final class ProductRepositoryTests: XCTestCase {
         }
 
         // Then
+        let getProductDetailCallCount = await cache.getProductDetailCallCount
+        let insertProductDetailCallCount = await cache.insertProductDetailCallCount
+        
         XCTAssertEqual(emittedDetails.count, 1)
         XCTAssertEqual(emittedDetails.first, cachedDetail)
         XCTAssertEqual((caughtError as? MockLocalizedError)?.errorDescription, expectedError.errorDescription)
-        XCTAssertEqual(cache.getProductDetailCallCount, 1)
+        XCTAssertEqual(getProductDetailCallCount, 1)
         XCTAssertEqual(apiClient.fetchProductDetailCallCount, 1)
-        XCTAssertEqual(cache.insertProductDetailCallCount, 1)
+        XCTAssertEqual(insertProductDetailCallCount, 1)
     }
 
     func testObserveProductDetail_whenTaskIsCancelled_finishesWithoutThrowingError() async throws {

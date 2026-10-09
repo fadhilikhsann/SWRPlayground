@@ -40,7 +40,7 @@ extension DefaultProductRepository: ProductRepository {
                 return
             }
             
-            let cachedPage = cache.getProductItemsByPage(for: request)
+            let cachedPage = await cache.getProductItemsByPage(for: request)
             if let cachedPage {
                 continuation.yield(cachedPage)
             }
@@ -51,7 +51,7 @@ extension DefaultProductRepository: ProductRepository {
                 
                 let domainPage = networkPage.toDomain()
                 
-                cache.insertProductItemsByPage(domainPage, for: request)
+                await cache.insertProductItemsByPage(domainPage, for: request)
                 if cachedPage != domainPage {
                     continuation.yield(domainPage)
                 }
@@ -79,7 +79,7 @@ extension DefaultProductRepository: ProductRepository {
                 return
             }
             
-            let cachedProduct = cache.getProductDetail(id: id)
+            let cachedProduct = await cache.getProductDetail(id: id)
             if let cachedProduct {
                 continuation.yield(cachedProduct)
             }
@@ -90,7 +90,7 @@ extension DefaultProductRepository: ProductRepository {
                 
                 let domainProduct = product.toDomain()
                 
-                cache.insertProductDetail(domainProduct)
+                await cache.insertProductDetail(domainProduct)
                 if cachedProduct != domainProduct {
                     continuation.yield(domainProduct)
                 }
